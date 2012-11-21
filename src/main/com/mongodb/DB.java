@@ -25,6 +25,7 @@ import org.bson.BSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class DB {
     
     private static final Set<String> _obedientCommands = new HashSet<String>();
-    
+
     static {
         _obedientCommands.add("group");
         _obedientCommands.add("aggregate");
@@ -64,9 +65,21 @@ public abstract class DB {
     }
 
     /**
-     * Tests if database commands are read preference obedient
-     * @param command the <code>DBObject</code> to test obedience
-     * @return true if the command is obedient
+     * @param mongo the mongo instance
+     * @param name the database name
+     */
+    DB( Mongo mongo , String name, String username, char[] password ) {
+        _mongo = mongo;
+        _name = name;
+        _options = new Bytes.OptionHolder( _mongo._netOptions );
+        authenticationCredentialsReference.set(new AuthenticationCredentials(username, password));
+    }
+
+    /**
+     * Determines the read preference that should be used for the given command.
+     * @param command the <code>DBObject</code> representing the command
+     * @param requestedPreference the preference requested by the client.
+     * @return the read preference to use for the given command.  It will never return null.
      * @see com.mongodb.ReadPreference
      */
     ReadPreference getCommandReadPreference(DBObject command, ReadPreference requestedPreference){
@@ -92,6 +105,8 @@ public abstract class DB {
         }
 
         if (primaryRequired) {
+            return ReadPreference.primary();
+        } else if (requestedPreference == null) {
             return ReadPreference.primary();
         } else {
             return requestedPreference;
@@ -253,9 +268,13 @@ public abstract class DB {
      * @dochub commands
      */
     public CommandResult command( DBObject cmd , int options, ReadPreference readPrefs, DBEncoder encoder ){
-
         readPrefs = getCommandReadPreference(cmd, readPrefs);
-        
+
+        // TODO: automate an integration test for this condition
+        if (getMongo().isMongosConnection()) {
+            cmd.put(QueryOpBuilder.READ_PREFERENCE_META_OPERATOR, readPrefs.toDBObject());
+        }
+
         Iterator<DBObject> i =
                 getCollection("$cmd").__find(cmd, new BasicDBObject(), 0, -1, 0, options, readPrefs ,
                         DefaultDBDecoder.FACTORY.create(), encoder);
@@ -551,53 +570,70 @@ public abstract class DB {
     }
 
     /**
-     *  Authenticates to db with the given name and password
+     *  Authenticates to db with the given credentials.  If this method (or {@code authenticateCommand} has already been
+     *  called with the same credentials and the authentication test succeeded, this method will return true.  If this method
+     *  has already been called with different credentials and the authentication test succeeded,
+     *  this method will throw an {@code IllegalStateException}.  If this method has already been called with any credentials
+     *  and the authentication test failed, this method will re-try the authentication test with the
+     *  given credentials.
      *
      * @param username name of user for this database
      * @param password password of user for this database
      * @return true if authenticated, false otherwise
-     * @throws MongoException
+     * @throws MongoException if authentication failed due to invalid user/pass, or other exceptions like I/O
+     * @throws IllegalStateException if authentiation test has already succeeded with different credentials
+     * @see #authenticateCommand(String, char[])
      * @dochub authenticate
      */
     public boolean authenticate(String username, char[] password ){
-
-        if (authenticationCredentialsReference.get() != null) {
-            throw new IllegalStateException("can't authenticate twice on the same database");
-        }
-
-        AuthenticationCredentials newCredentials = new AuthenticationCredentials(username, password);
-        CommandResult res = newCredentials.authenticate();
-        if (!res.ok())
-            return false;
-
-        boolean wasNull = authenticationCredentialsReference.compareAndSet(null, newCredentials);
-        if (!wasNull) {
-            throw new IllegalStateException("can't authenticate twice on the same database");
-        }
-        return true;
+        return authenticateCommandHelper(username, password).ok();
     }
 
     /**
-     *  Authenticates to db with the given name and password
+     *  Authenticates to db with the given credentials.  If this method (or {@code authenticate} has already been
+     *  called with the same credentials and the authentication test succeeded, this method will return true.  If this method
+     *  has already been called with different credentials and the authentication test succeeded,
+     *  this method will throw an {@code IllegalStateException}.  If this method has already been called with any credentials
+     *  and the authentication test failed, this method will re-try the authentication test with the
+     *  given credentials.
+     *
      *
      * @param username name of user for this database
      * @param password password of user for this database
      * @return the CommandResult from authenticate command
      * @throws MongoException if authentication failed due to invalid user/pass, or other exceptions like I/O
+     * @throws IllegalStateException if authentiation test has already succeeded with different credentials
+     * @see #authenticate(String, char[])
      * @dochub authenticate
      */
     public synchronized CommandResult authenticateCommand(String username, char[] password ){
+        CommandResult res = authenticateCommandHelper(username, password);
+        res.throwOnError();
+        return res;
+    }
 
-        if (authenticationCredentialsReference.get() != null) {
-            throw new IllegalStateException( "can't authenticate twice on the same database" );
+    private CommandResult authenticateCommandHelper(String username, char[] password) {
+        AuthenticationCredentials currentCredentials = authenticationCredentialsReference.get();
+        AuthenticationCredentials newCredentials = new AuthenticationCredentials(username, password);
+
+        if (currentCredentials != null) {
+            if (currentCredentials.equals(newCredentials)) {
+                if (credentialsAlreadySuccessfullyTested) {
+                    return authenticationTestCommandResult;
+                }
+            } else {
+                throw new IllegalStateException("can't authenticate twice on the same database");
+            }
         }
 
-        AuthenticationCredentials newCredentials = new AuthenticationCredentials(username, password);
         CommandResult res = newCredentials.authenticate();
-        res.throwOnError();
-        boolean wasNull = authenticationCredentialsReference.compareAndSet(null, newCredentials);
-        if (!wasNull) {
-            throw new IllegalStateException("can't authenticate twice on the same database");
+        if (res.ok()) {
+            boolean wasNull = authenticationCredentialsReference.compareAndSet(null, newCredentials);
+            if (!wasNull && credentialsAlreadySuccessfullyTested) {
+                throw new IllegalStateException("can't authenticate twice on the same database");
+            }
+            credentialsAlreadySuccessfullyTested = true;
+            authenticationTestCommandResult = res;
         }
         return res;
     }
@@ -769,8 +805,14 @@ public abstract class DB {
     private com.mongodb.ReadPreference _readPref;
     final Bytes.OptionHolder _options;
 
+    // the credentials, possibly set in the constructor, in which case they have not been tested yet.
     private AtomicReference<AuthenticationCredentials> authenticationCredentialsReference =
             new AtomicReference<AuthenticationCredentials>();
+    // this can be false with credentials set if the credentials were passed in to the constructor
+    private volatile boolean credentialsAlreadySuccessfullyTested = false;
+    // cached authentication command result, to return in case of multiple calls to authenticateCommand with the
+    // same credentials
+    private volatile CommandResult authenticationTestCommandResult;
 
     /**
      * Encapsulate everything relating to authorization of a user on a database
@@ -788,6 +830,26 @@ public abstract class DB {
             }
             this.userName = userName;
             this.authHash = createHash(userName, password);
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            final AuthenticationCredentials that = (AuthenticationCredentials) o;
+
+            if (!Arrays.equals(authHash, that.authHash)) return false;
+            if (!userName.equals(that.userName)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = userName.hashCode();
+            result = 31 * result + Arrays.hashCode(authHash);
+            return result;
         }
 
         CommandResult authenticate() {

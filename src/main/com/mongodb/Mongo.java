@@ -64,8 +64,11 @@ import java.util.concurrent.ConcurrentMap;
  * mongo.setWriteConcern(WriteConcern.SAFE);
  * </pre>
  *
- * @see com.mongodb.ReadPreference
- * @see com.mongodb.WriteConcern
+ * Note: This class has been superseded by {@code MongoClient}, and may be deprecated in a future release.
+ *
+ * @see MongoClient
+ * @see ReadPreference
+ * @see WriteConcern
  */
 public class Mongo {
 
@@ -82,11 +85,14 @@ public class Mongo {
      * @deprecated Replaced by <code>Mongo.getMinorVersion()</code>
      */
     @Deprecated
-    public static final int MINOR_VERSION = 9;
+    public static final int MINOR_VERSION = 10;
 
-    private static final String FULL_VERSION = "2.9.0-RC1";
+    private static final String FULL_VERSION = "2.10.0-SNAPSHOT";
 
     static int cleanerIntervalMS;
+
+    private static final String ADMIN_DATABASE_NAME = "admin";
+
     static {
         cleanerIntervalMS = Integer.parseInt(System.getProperty("com.mongodb.cleanerIntervalMS", "1000"));
     }
@@ -292,6 +298,8 @@ public class Mongo {
     /**
      * Creates a Mongo described by a URI.
      * If only one address is used it will only connect to that node, otherwise it will discover all nodes.
+     * If the URI contains database credentials, the database will be authenticated lazily on first use
+     * with those credentials.
      * @param uri
      * @see MongoURI
      * <p>examples:
@@ -321,6 +329,18 @@ public class Mongo {
             _addr = null;
             _addrs = replicaSetSeeds;
             _connector = new DBTCPConnector( this , replicaSetSeeds );
+        }
+
+        if (uri.getUsername() != null) {
+            String databaseName;
+            if (uri.getDatabase() != null) {
+                databaseName = uri.getDatabase();
+            } else {
+                databaseName = ADMIN_DATABASE_NAME;
+            }
+
+            DB db = new DBApiLayer(this, databaseName, _connector, uri.getUsername(), uri.getPassword());
+            _dbs.put(db.getName(), db);
         }
 
         _connector.start();
@@ -370,7 +390,7 @@ public class Mongo {
         cmd.put("listDatabases", 1);
 
 
-        CommandResult res = getDB( "admin" ).command(cmd, getOptions());
+        CommandResult res = getDB(ADMIN_DATABASE_NAME).command(cmd, getOptions());
         res.throwOnError();
 
         List l = (List)res.get("databases");
@@ -638,7 +658,7 @@ public class Mongo {
         if (async) {
             cmd.put("async", 1);
         }
-        return getDB("admin").command(cmd);
+        return getDB(ADMIN_DATABASE_NAME).command(cmd);
     }
 
     /**
@@ -650,7 +670,7 @@ public class Mongo {
     public CommandResult fsyncAndLock() {
         DBObject cmd = new BasicDBObject("fsync", 1);
         cmd.put("lock", 1);
-        return getDB("admin").command(cmd);
+        return getDB(ADMIN_DATABASE_NAME).command(cmd);
     }
 
     /**
@@ -660,7 +680,7 @@ public class Mongo {
      * @throws MongoException
      */
     public DBObject unlock() {
-        DB db = getDB("admin");
+        DB db = getDB(ADMIN_DATABASE_NAME);
         DBCollection col = db.getCollection("$cmd.sys.unlock");
         return col.findOne();
     }
@@ -671,7 +691,7 @@ public class Mongo {
      * @throws MongoException
      */
     public boolean isLocked() {
-        DB db = getDB("admin");
+        DB db = getDB(ADMIN_DATABASE_NAME);
         DBCollection col = db.getCollection("$cmd.sys.inprog");
         BasicDBObject res = (BasicDBObject) col.findOne();
         if (res.containsField("fsyncLock")) {

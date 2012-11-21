@@ -19,9 +19,11 @@
 package com.mongodb;
 
 // Mongo
+
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,9 +35,9 @@ import java.util.Set;
 /** This class provides a skeleton implementation of a database collection.
  * <p>A typical invocation sequence is thus
  * <blockquote><pre>
- *     Mongo mongo = new Mongo( new DBAddress( "localhost", 127017 ) );
- *     DB db = mongo.getDB( "mydb" );
- *     DBCollection collection = db.getCollection( "test" );
+ *     MongoClient mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
+ *     DB db = mongo.getDB("mydb");
+ *     DBCollection collection = db.getCollection("test");
  * </pre></blockquote>
  * @dochub collections
  */
@@ -69,7 +71,9 @@ public abstract class DBCollection {
      * @throws MongoException
      * @dochub insert
      */
-    public abstract WriteResult insert(DBObject[] arr , WriteConcern concern, DBEncoder encoder);
+    public WriteResult insert(DBObject[] arr , WriteConcern concern, DBEncoder encoder) {
+        return insert(Arrays.asList(arr), concern, encoder);
+    }
 
     /**
      * Inserts a document into the database.
@@ -83,7 +87,7 @@ public abstract class DBCollection {
      * @dochub insert
      */
     public WriteResult insert(DBObject o , WriteConcern concern ){
-        return insert( new DBObject[]{ o } , concern );
+        return insert( Arrays.asList(o) , concern );
     }
 
     /**
@@ -140,8 +144,21 @@ public abstract class DBCollection {
      * @dochub insert
      */
     public WriteResult insert(List<DBObject> list, WriteConcern concern ){
-        return insert( list.toArray( new DBObject[list.size()] ) , concern );
+        return insert(list, concern, getDBEncoder() );
     }
+
+    /**
+     * Saves document(s) to the database.
+     * if doc doesn't have an _id, one will be added
+     * you can get the _id that was added from doc after the insert
+     *
+     * @param list list of documents to save
+     * @param concern the write concern
+     * @return
+     * @throws MongoException
+     * @dochub insert
+     */
+    public abstract WriteResult insert(List<DBObject> list, WriteConcern concern, DBEncoder encoder);
 
     /**
      * Performs an update operation.
@@ -356,7 +373,7 @@ public abstract class DBCollection {
             cmd.append( "remove", remove );
         else {
             if (update != null && !update.keySet().isEmpty()) {
-                // if 1st key doesnt start with $, then object will be inserted as is, need to check it
+                // if 1st key doesn't start with $, then object will be inserted as is, need to check it
                 String key = update.keySet().iterator().next();
                 if (key.charAt(0) != '$')
                     _checkObject(update, false, false);
@@ -1352,7 +1369,7 @@ public abstract class DBCollection {
     public boolean isCapped() {
         CommandResult stats = getStats();
         Object capped = stats.get("capped");
-        return(capped != null && (Integer)capped == 1);
+        return(capped != null && ( capped.equals(1) || capped.equals(true) ) );
     }
 
     // ------

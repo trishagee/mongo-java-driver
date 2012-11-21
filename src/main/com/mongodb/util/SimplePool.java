@@ -95,7 +95,7 @@ public abstract class SimplePool<T> {
     /** Gets an object from the pool - will block if none are available
      * @return An object from the pool
      */
-    public T get() {
+    public T get() throws InterruptedException {
 	return get(-1);
     }
     
@@ -106,7 +106,7 @@ public abstract class SimplePool<T> {
      *        positive ms to wait
      * @return An object from the pool, or null if can't get one in the given waitTime
      */
-    public T get(long waitTime) {
+    public T get(long waitTime) throws InterruptedException {
         if (!permitAcquired(waitTime)) {
             return null;
         }
@@ -143,30 +143,24 @@ public abstract class SimplePool<T> {
         }
     }
 
-    private boolean permitAcquired(final long waitTime) {
-        try {
-            if (waitTime > 0) {
-                return _sem.tryAcquire(waitTime, TimeUnit.MILLISECONDS);
-            } else if (waitTime < 0) {
-                _sem.acquire();
-                return true;
-            } else {
-                return _sem.tryAcquire();
-            }
-        } catch (InterruptedException e) {
-            return false;
+    private boolean permitAcquired(final long waitTime) throws InterruptedException {
+        if (waitTime > 0) {
+            return _sem.tryAcquire(waitTime, TimeUnit.MILLISECONDS);
+        } else if (waitTime < 0) {
+            _sem.acquire();
+            return true;
+        } else {
+            return _sem.tryAcquire();
         }
     }
 
     /** Clears the pool of all objects. */
-    protected void close(){
-        synchronized( _avail ){
-            _closed = true;
-            for ( T t : _avail )
-                cleanup( t );
-            _avail.clear();
-            _out.clear();
-        }
+    protected synchronized void close(){
+        _closed = true;
+        for (T t : _avail)
+            cleanup(t);
+        _avail.clear();
+        _out.clear();
     }
 
     public String getName() {

@@ -21,13 +21,35 @@ package com.mongodb;
 import javax.net.SocketFactory;
 
 /**
- * Various settings for the driver.
- * Not thread safe.
+ * Various settings for a Mongo instance. Not thread safe, and superseded by MongoClientOptions.  This class may
+ * be deprecated in a future release.
+ *
+ * @see MongoClientOptions
+ * @see MongoClient
  */
 public class MongoOptions {
 
     public MongoOptions(){
         reset();
+    }
+
+    public MongoOptions(final MongoClientOptions options) {
+        connectionsPerHost = options.getConnectionsPerHost();
+        threadsAllowedToBlockForConnectionMultiplier = options.getThreadsAllowedToBlockForConnectionMultiplier();
+        maxWaitTime = options.getMaxWaitTime();
+        connectTimeout = options.getConnectTimeout();
+        socketTimeout = options.getSocketTimeout();
+        socketKeepAlive = options.isSocketKeepAlive();
+        autoConnectRetry = options.isAutoConnectRetry();
+        maxAutoConnectRetryTime = options.getMaxAutoConnectRetryTime();
+        readPreference = options.getReadPreference();
+        dbDecoderFactory = options.getDbDecoderFactory();
+        dbEncoderFactory = options.getDbEncoderFactory();
+        socketFactory = options.getSocketFactory();
+        description = options.getDescription();
+        cursorFinalizerEnabled = options.isCursorFinalizerEnabled();
+        writeConcern = options.getWriteConcern();
+        slaveOk = false; // default to false, as readPreference field will be responsible
     }
 
     public void reset(){
@@ -79,17 +101,82 @@ public class MongoOptions {
     }
 
     /**
-     * Helper method to return the appropriate WriteConcern instance based
-     * on the current related options settings.
+     * Helper method to return the appropriate WriteConcern instance based on the current related options settings.
      **/
-    public WriteConcern getWriteConcern(){
-        // Ensure we only set writeconcern once; if non-default w, etc skip safe (implied)
-        if ( w != 0 || wtimeout != 0 || fsync )
-            return new WriteConcern( w , wtimeout , fsync );
-        else if (safe)
+    public WriteConcern getWriteConcern() {
+        if (writeConcern != null) {
+            return writeConcern;
+        } else if ( w != 0 || wtimeout != 0 || fsync | j) {
+            return new WriteConcern( w , wtimeout , fsync, j );
+        } else if (safe) {
             return WriteConcern.SAFE;
-        else
+        } else {
             return WriteConcern.NORMAL;
+        }
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final MongoOptions options = (MongoOptions) o;
+
+        if (autoConnectRetry != options.autoConnectRetry) return false;
+        if (connectTimeout != options.connectTimeout) return false;
+        if (connectionsPerHost != options.connectionsPerHost) return false;
+        if (cursorFinalizerEnabled != options.cursorFinalizerEnabled) return false;
+        if (fsync != options.fsync) return false;
+        if (j != options.j) return false;
+        if (maxAutoConnectRetryTime != options.maxAutoConnectRetryTime) return false;
+        if (maxWaitTime != options.maxWaitTime) return false;
+        if (safe != options.safe) return false;
+        if (slaveOk != options.slaveOk) return false;
+        if (socketKeepAlive != options.socketKeepAlive) return false;
+        if (socketTimeout != options.socketTimeout) return false;
+        if (threadsAllowedToBlockForConnectionMultiplier != options.threadsAllowedToBlockForConnectionMultiplier)
+            return false;
+        if (w != options.w) return false;
+        if (wtimeout != options.wtimeout) return false;
+        if (dbDecoderFactory != null ? !dbDecoderFactory.equals(options.dbDecoderFactory) : options.dbDecoderFactory != null)
+            return false;
+        if (dbEncoderFactory != null ? !dbEncoderFactory.equals(options.dbEncoderFactory) : options.dbEncoderFactory != null)
+            return false;
+        if (description != null ? !description.equals(options.description) : options.description != null) return false;
+        if (readPreference != null ? !readPreference.equals(options.readPreference) : options.readPreference != null)
+            return false;
+        if (socketFactory != null ? !socketFactory.equals(options.socketFactory) : options.socketFactory != null)
+            return false;
+        if (writeConcern != null ? !writeConcern.equals(options.writeConcern) : options.writeConcern != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = description != null ? description.hashCode() : 0;
+        result = 31 * result + connectionsPerHost;
+        result = 31 * result + threadsAllowedToBlockForConnectionMultiplier;
+        result = 31 * result + maxWaitTime;
+        result = 31 * result + connectTimeout;
+        result = 31 * result + socketTimeout;
+        result = 31 * result + (socketKeepAlive ? 1 : 0);
+        result = 31 * result + (autoConnectRetry ? 1 : 0);
+        result = 31 * result + (int) (maxAutoConnectRetryTime ^ (maxAutoConnectRetryTime >>> 32));
+        result = 31 * result + (slaveOk ? 1 : 0);
+        result = 31 * result + (readPreference != null ? readPreference.hashCode() : 0);
+        result = 31 * result + (dbDecoderFactory != null ? dbDecoderFactory.hashCode() : 0);
+        result = 31 * result + (dbEncoderFactory != null ? dbEncoderFactory.hashCode() : 0);
+        result = 31 * result + (safe ? 1 : 0);
+        result = 31 * result + w;
+        result = 31 * result + wtimeout;
+        result = 31 * result + (fsync ? 1 : 0);
+        result = 31 * result + (j ? 1 : 0);
+        result = 31 * result + (socketFactory != null ? socketFactory.hashCode() : 0);
+        result = 31 * result + (cursorFinalizerEnabled ? 1 : 0);
+        result = 31 * result + (writeConcern != null ? writeConcern.hashCode() : 0);
+        return result;
     }
 
     /**
@@ -196,7 +283,7 @@ public class MongoOptions {
      */
     public boolean safe;
 
-    /** 
+    /**
      * The "w" value, (number of writes), of the global WriteConcern.
      * Default is 0.
      */
@@ -236,7 +323,18 @@ public class MongoOptions {
      */
     public boolean cursorFinalizerEnabled;
 
-
+    /**
+     * Sets the write concern.  If this is not set, the write concern defaults to the combination of settings of
+     * the other write concern-related fields.  If set, this will override all of the other write concern-related
+     * fields.
+     *
+     * @see #w
+     * @see #safe
+     * @see #wtimeout
+     * @see #fsync
+     * @see #j
+     */
+    public WriteConcern writeConcern;
 
     public String toString(){
         StringBuilder buf = new StringBuilder();
@@ -253,6 +351,9 @@ public class MongoOptions {
         if (readPreference != null) {
             buf.append( "readPreference").append( readPreference );
         }
+        if (writeConcern != null) {
+            buf.append( "writeConcern").append( writeConcern );
+        }
         buf.append( "safe=" ).append( safe ).append( ", " );
         buf.append( "w=" ).append( w ).append( ", " );
         buf.append( "wtimeout=" ).append( wtimeout ).append( ", " );
@@ -264,14 +365,14 @@ public class MongoOptions {
     }
 
     /**
-     * @return The description for <code>Mongo</code> instances created with these options
+     * @return The description for <code>MongoClient</code> instances created with these options
      */
     public synchronized String getDescription() {
         return description;
     }
 
     /**
-     * 
+     *
      * @param desc The description for <code>Mongo</code> instances created with these options
      */
     public synchronized void setDescription(String desc) {
@@ -279,7 +380,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return the maximum number of connections allowed per host for this Mongo instance
      */
     public synchronized int getConnectionsPerHost() {
@@ -287,7 +388,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param connections sets the maximum number of connections allowed per host for this Mongo instance
      */
     public synchronized void setConnectionsPerHost(int connections) {
@@ -295,7 +396,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return the maximum number of threads that
      * may be waiting for a connection
      */
@@ -304,16 +405,16 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param threads multiplied with connectionsPerHost, sets the maximum number of threads that
      * may be waiting for a connection
      */
     public synchronized void setThreadsAllowedToBlockForConnectionMultiplier(int threads) {
         threadsAllowedToBlockForConnectionMultiplier = threads;
     }
-    
+
     /**
-     * 
+     *
      * @return The maximum time in milliseconds that threads wait for a connection
      */
     public synchronized int getMaxWaitTime() {
@@ -321,7 +422,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param timeMS set the maximum time in milliseconds that threads wait for a connection
      */
     public synchronized void setMaxWaitTime(int timeMS) {
@@ -329,7 +430,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return the connection timeout in milliseconds.
      */
     public synchronized int getConnectTimeout() {
@@ -337,7 +438,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param timeoutMS set the connection timeout in milliseconds.
      */
     public synchronized void setConnectTimeout(int timeoutMS) {
@@ -345,7 +446,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return The socket timeout in milliseconds
      */
     public synchronized int getSocketTimeout() {
@@ -353,7 +454,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param timeoutMS set the socket timeout in milliseconds
      */
     public synchronized void setSocketTimeout(int timeoutMS) {
@@ -361,7 +462,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return connection keep-alive flag
      */
     public synchronized boolean isSocketKeepAlive() {
@@ -369,7 +470,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param keepAlive set connection keep-alive flag
      */
     public synchronized void setSocketKeepAlive(boolean keepAlive) {
@@ -377,7 +478,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return keep trying connection flag
      */
     public synchronized boolean isAutoConnectRetry() {
@@ -385,7 +486,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param retry sets keep trying connection flag
      */
     public synchronized void setAutoConnectRetry(boolean retry) {
@@ -393,7 +494,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return max time in MS to retrying open connection
      */
     public synchronized long getMaxAutoConnectRetryTime() {
@@ -401,7 +502,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param retryTimeMS set max time in MS to retrying open connection
      */
     public synchronized void setMaxAutoConnectRetryTime(long retryTimeMS) {
@@ -409,7 +510,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return the DBCallback decoding factory
      */
     public synchronized DBDecoderFactory getDbDecoderFactory() {
@@ -417,7 +518,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param factory sets the DBCallback decoding factory
      */
     public synchronized void setDbDecoderFactory(DBDecoderFactory factory) {
@@ -425,7 +526,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return the encoding factory
      */
     public synchronized DBEncoderFactory getDbEncoderFactory() {
@@ -433,7 +534,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param factory sets the encoding factory
      */
     public synchronized void setDbEncoderFactory(DBEncoderFactory factory) {
@@ -441,7 +542,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return true if driver uses WriteConcern.SAFE for all operations.
      */
     public synchronized boolean isSafe() {
@@ -449,7 +550,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param isSafe true if driver uses WriteConcern.SAFE for all operations.
      */
     public synchronized void setSafe(boolean isSafe) {
@@ -457,7 +558,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return value returns the number of writes of the global WriteConcern.
      */
     public synchronized int getW() {
@@ -465,7 +566,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param val set the number of writes of the global WriteConcern.
      */
     public synchronized void setW(int val) {
@@ -473,7 +574,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return timeout for write operation
      */
     public synchronized int getWtimeout() {
@@ -481,7 +582,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param timeoutMS sets timeout for write operation
      */
     public synchronized void setWtimeout(int timeoutMS) {
@@ -489,7 +590,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return true if global write concern is set to fsync
      */
     public synchronized boolean isFsync() {
@@ -497,7 +598,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param sync sets global write concern's fsync safe value
      */
     public synchronized void setFsync(boolean sync) {
@@ -505,7 +606,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @return true if global write concern is set to journal safe
      */
     public synchronized boolean isJ() {
@@ -513,7 +614,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param safe sets global write concern's journal safe value
      */
     public synchronized void setJ(boolean safe) {
@@ -521,7 +622,15 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
+     * @param writeConcern sets the write concern
+     */
+    public void setWriteConcern(final WriteConcern writeConcern) {
+        this.writeConcern = writeConcern;
+    }
+
+    /**
+     *
      * @return the socket factory for creating sockets to mongod
      */
     public synchronized SocketFactory getSocketFactory() {
@@ -529,7 +638,7 @@ public class MongoOptions {
     }
 
     /**
-     * 
+     *
      * @param factory sets the socket factory for creating sockets to mongod
      */
     public synchronized void setSocketFactory(SocketFactory factory) {
@@ -567,5 +676,6 @@ public class MongoOptions {
      */
     public void setCursorFinalizerEnabled(final boolean cursorFinalizerEnabled) {
         this.cursorFinalizerEnabled = cursorFinalizerEnabled;
+
     }
 }

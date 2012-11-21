@@ -126,6 +126,7 @@ public class DBTCPConnector implements DBConnector {
      */
     @Override
     public void requestEnsureConnection(){
+        checkMaster( false , true );
         _myPort.get().requestEnsureConnection();
     }
 
@@ -250,64 +251,72 @@ public class DBTCPConnector implements DBConnector {
      * @throws MongoException
      */
     @Override
-    public Response call( DB db, DBCollection coll, OutMessage m, ServerAddress hostNeeded, int retries, ReadPreference readPref, DBDecoder decoder ){
-
+    public Response call( DB db, DBCollection coll, OutMessage m, ServerAddress hostNeeded, int retries,
+                          ReadPreference readPref, DBDecoder decoder ){
         try {
-            if (readPref == null)
-                readPref = ReadPreference.primary();
-
-            if (readPref == ReadPreference.primary() && m.hasOption( Bytes.QUERYOPTION_SLAVEOK ))
-               readPref = ReadPreference.secondaryPreferred();
-
-            boolean secondaryOk = !(readPref == ReadPreference.primary());
-
-            _checkClosed();
-            checkMaster( false, !secondaryOk );
-
-            final MyPort mp = _myPort.get();
-            final DBPort port = mp.get( false , readPref, hostNeeded );
-
-            Response res = null;
-            boolean retry = false;
-            try {
-                port.checkAuth( db );
-                res = port.call( m , coll, decoder );
-                if ( res._responseTo != m.getId() )
-                    throw new MongoException( "ids don't match" );
-            }
-            catch ( IOException ioe ){
-                mp.error( port , ioe );
-                retry = retries > 0 && !coll._name.equals( "$cmd" )
-                        && !(ioe instanceof SocketTimeoutException) && _error( ioe, secondaryOk );
-                if ( !retry ){
-                    throw new MongoException.Network( "can't call something : " + port.host() + "/" + db,
-                                                      ioe );
-                }
-            }
-            catch ( RuntimeException re ){
-                mp.error( port , re );
-                throw re;
-            } finally {
-                mp.done( port );
-            }
-
-            if (retry)
-                return call( db , coll , m , hostNeeded , retries - 1 , readPref, decoder );
-
-            ServerError err = res.getError();
-
-            if ( err != null && err.isNotMasterError() ){
-                checkMaster( true , true );
-                if ( retries <= 0 ){
-                    throw new MongoException( "not talking to master and retries used up" );
-                }
-                return call( db , coll , m , hostNeeded , retries -1, readPref, decoder );
-            }
-
-            return res;
+            return innerCall(db, coll, m, hostNeeded, retries, readPref, decoder);
         } finally {
             m.doneWithMessage();
         }
+    }
+
+    // This method is recursive.  It calls itself to implement query retry logic.
+    private Response innerCall(final DB db, final DBCollection coll, final OutMessage m, final ServerAddress hostNeeded,
+                               final int retries, ReadPreference readPref, final DBDecoder decoder) {
+        if (readPref == null)
+            readPref = ReadPreference.primary();
+
+        if (readPref == ReadPreference.primary() && m.hasOption( Bytes.QUERYOPTION_SLAVEOK ))
+           readPref = ReadPreference.secondaryPreferred();
+
+        boolean secondaryOk = !(readPref == ReadPreference.primary());
+
+        _checkClosed();
+        // Don't check master on secondary reads unless connected to a replica set
+        if (!secondaryOk || getReplicaSetStatus() == null)
+            checkMaster( false, !secondaryOk );
+
+        final MyPort mp = _myPort.get();
+        final DBPort port = mp.get( false , readPref, hostNeeded );
+
+        Response res = null;
+        boolean retry = false;
+        try {
+            port.checkAuth( db );
+            res = port.call( m , coll, decoder );
+            if ( res._responseTo != m.getId() )
+                throw new MongoException( "ids don't match" );
+        }
+        catch ( IOException ioe ){
+            mp.error( port , ioe );
+            retry = retries > 0 && !coll._name.equals( "$cmd" )
+                    && !(ioe instanceof SocketTimeoutException) && _error( ioe, secondaryOk );
+            if ( !retry ){
+                throw new MongoException.Network( "can't call something : " + port.host() + "/" + db,
+                                                  ioe );
+            }
+        }
+        catch ( RuntimeException re ){
+            mp.error( port , re );
+            throw re;
+        } finally {
+            mp.done( port );
+        }
+
+        if (retry)
+            return innerCall( db , coll , m , hostNeeded , retries - 1 , readPref, decoder );
+
+        ServerError err = res.getError();
+
+        if ( err != null && err.isNotMasterError() ){
+            checkMaster( true , true );
+            if ( retries <= 0 ){
+                throw new MongoException( "not talking to master and retries used up" );
+            }
+            return innerCall( db , coll , m , hostNeeded , retries -1, readPref, decoder );
+        }
+
+        return res;
     }
 
     public ServerAddress getAddress(){
@@ -431,10 +440,11 @@ public class DBTCPConnector implements DBConnector {
                 p = _masterPortPool.get();
             }
             else {
-                ConnectionStatus.Node node = readPref.getNode(getReplicaSetStatus()._replicaSetHolder.get());
+                ReplicaSetStatus.ReplicaSet replicaSet = getReplicaSetStatus()._replicaSetHolder.get();
+                ConnectionStatus.Node node = readPref.getNode(replicaSet);
             
                 if (node == null)
-                    throw new MongoException("No replica set members available for query with "+readPref.toDBObject().toString());
+                    throw new MongoException("No replica set members available in " +  replicaSet + " for " + readPref.toDBObject().toString());
             
                 p = _portHolder.get(node.getServerAddress()).get();
             }
@@ -560,7 +570,7 @@ public class DBTCPConnector implements DBConnector {
             return false;
 
         if (  _masterPortPool != null )
-            _logger.log(Level.WARNING, "Master switching from " + _masterPortPool.getServerAddress() + " to " + addr);
+            _logger.log(Level.WARNING, "Primary switching from " + _masterPortPool.getServerAddress() + " to " + addr);
         _masterPortPool = newPool;
         return true;
     }
