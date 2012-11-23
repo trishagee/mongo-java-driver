@@ -277,7 +277,7 @@ public abstract class DB {
 
         Iterator<DBObject> i =
                 getCollection("$cmd").__find(cmd, new BasicDBObject(), 0, -1, 0, options, readPrefs ,
-                        DefaultDBDecoder.FACTORY.create(), encoder);
+                        _mongo.getMongoOptions().getDbDecoderFactory().create(), encoder);
         if ( i == null || ! i.hasNext() )
             return null;
 
