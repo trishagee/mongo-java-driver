@@ -253,7 +253,7 @@ public abstract class DB {
      * @dochub commands
      */
     public CommandResult command( DBObject cmd , int options, ReadPreference readPrefs ){
-        return command(cmd, options, readPrefs, DefaultDBEncoder.FACTORY.create());
+        return command(cmd, options, readPrefs, _mongo.getMongoOptions().getDbEncoderFactory().create());
     }
 
     /**

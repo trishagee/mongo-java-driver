@@ -139,9 +139,8 @@ public class DBPort {
     }
 
     synchronized private Response findOne( DB db , String coll , DBObject q ) throws IOException {
-        OutMessage msg = OutMessage.query( db.getCollection(coll) , 0 , 0 , -1 , q , null );
-        Response res = go( msg , db.getCollection( coll ) , null );
-        return res;
+        OutMessage msg = OutMessage.query(db.getCollection(coll), 0, 0, -1, q, null, ReadPreference.primary(), _options.getDbEncoderFactory().create());
+        return go(msg, db.getCollection(coll), null);
     }
 
     synchronized CommandResult runCommand( DB db , DBObject cmd ) throws IOException {
@@ -172,7 +171,7 @@ public class DBPort {
     }
 
     /**
-     * makes sure that a connection to the server has been opened
+     * Makes sure that a connection to the server has been opened
      * @throws IOException
      */
     public synchronized void ensureOpen()
@@ -240,8 +239,7 @@ public class DBPort {
     }
     
     /**
-     * returns a String representation of the target host
-     * @return
+     * @return a String representation of the target host
      */
     public String host(){
         return _addr.toString();

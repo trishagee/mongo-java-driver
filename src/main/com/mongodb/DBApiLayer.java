@@ -229,7 +229,7 @@ public class DBApiLayer extends DB {
         protected WriteResult insert(List<DBObject> list, boolean shouldApply , com.mongodb.WriteConcern concern, DBEncoder encoder ){
 
             if (encoder == null)
-                encoder = DefaultDBEncoder.FACTORY.create();
+                encoder = _mongo.getMongoOptions().getDbEncoderFactory().create();
 
             if ( willTrace() ) {
                 for (DBObject o : list) {
@@ -280,7 +280,7 @@ public class DBApiLayer extends DB {
             }
 
             if (encoder == null)
-                encoder = DefaultDBEncoder.FACTORY.create();
+                encoder = _mongo.getMongoOptions().getDbEncoderFactory().create();
 
             if ( willTrace() ) trace( "remove: " + _fullNameSpace + " " + JSON.serialize( o ) );
 
@@ -292,7 +292,7 @@ public class DBApiLayer extends DB {
         @Override
         Iterator<DBObject> __find( DBObject ref , DBObject fields , int numToSkip , int batchSize, int limit , int options, ReadPreference readPref, DBDecoder decoder ){
 
-            return __find(ref, fields, numToSkip, batchSize, limit, options, readPref, decoder, DefaultDBEncoder.FACTORY.create());
+            return __find(ref, fields, numToSkip, batchSize, limit, options, readPref, decoder, _mongo.getMongoOptions().getDbEncoderFactory().create());
         }
 
         @Override
@@ -331,7 +331,7 @@ public class DBApiLayer extends DB {
             }
 
             if (encoder == null)
-                encoder = DefaultDBEncoder.FACTORY.create();
+                encoder = _mongo.getMongoOptions().getDbEncoderFactory().create();
 
             if (!o.keySet().isEmpty()) {
                 // if 1st key doesn't start with $, then object will be inserted as is, need to check it
@@ -352,7 +352,7 @@ public class DBApiLayer extends DB {
         public void createIndex( final DBObject keys, final DBObject options, DBEncoder encoder ){
 
             if (encoder == null)
-                encoder = DefaultDBEncoder.FACTORY.create();
+                encoder = _mongo.getMongoOptions().getDbEncoderFactory().create();
 
             DBObject full = new BasicDBObject();
             for ( String k : options.keySet() )

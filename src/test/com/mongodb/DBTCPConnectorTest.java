@@ -37,6 +37,7 @@ public class DBTCPConnectorTest extends TestCase {
         cleanupDB = "com_mongodb_unittest_DBTCPConnectorTest";
         _db = cleanupMongo.getDB(cleanupDB);
         _collection = _db.getCollection("testCol");
+        _dbEncoder = DefaultDBEncoder.FACTORY.create();
     }
 
     @BeforeMethod
@@ -80,7 +81,7 @@ public class DBTCPConnectorTest extends TestCase {
         _connector.say(_db, createOutMessageForInsert(), WriteConcern.SAFE);
         DBPort requestPort = _connector.getMyPort()._requestPort;
         _connector.call(_db, _collection,
-                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.primary()),
+                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.primary(), _dbEncoder),
                 null, 0);
         assertEquals(requestPort, _connector.getMyPort()._requestPort);
     }
@@ -96,7 +97,7 @@ public class DBTCPConnectorTest extends TestCase {
 
         _connector.requestStart();
         _connector.call(_db, _collection,
-                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.secondary()),
+                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.secondary(), _dbEncoder),
                 null, 0, ReadPreference.secondary(), null);
         DBPort requestPort = _connector.getMyPort()._requestPort;
         _connector.say(_db, createOutMessageForInsert(), WriteConcern.SAFE);
@@ -111,7 +112,7 @@ public class DBTCPConnectorTest extends TestCase {
     public void testConnectionReservationForReads() {
         _connector.requestStart();
         _connector.call(_db, _collection,
-                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.primary()),
+                OutMessage.query(_collection, 0, 0, -1, new BasicDBObject(), new BasicDBObject(), ReadPreference.primary(), _dbEncoder),
                 null, 0);
         assertNotNull(_connector.getMyPort()._requestPort);
     }
@@ -127,4 +128,5 @@ public class DBTCPConnectorTest extends TestCase {
     private DB _db;
     private DBCollection _collection;
     private DBTCPConnector _connector;
+    private DBEncoder _dbEncoder;
 }

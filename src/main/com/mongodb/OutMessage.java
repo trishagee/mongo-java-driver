@@ -71,14 +71,6 @@ class OutMessage extends BasicBSONEncoder {
         return om;
     }
 
-    static OutMessage query( DBCollection collection , int options , int numToSkip , int batchSize , DBObject query , DBObject fields ){
-        return query( collection, options, numToSkip, batchSize, query, fields, ReadPreference.primary() );
-    }
-
-    static OutMessage query( DBCollection collection , int options , int numToSkip , int batchSize , DBObject query , DBObject fields, ReadPreference readPref ){
-        return query( collection, options, numToSkip, batchSize, query, fields, readPref, DefaultDBEncoder.FACTORY.create());
-    }
-
     static OutMessage query( DBCollection collection , int options , int numToSkip , int batchSize , DBObject query , DBObject fields, ReadPreference readPref, DBEncoder enc ){
         OutMessage om =  new OutMessage(collection, enc, query, options, readPref);
         om.writeQuery(fields, numToSkip, batchSize);
