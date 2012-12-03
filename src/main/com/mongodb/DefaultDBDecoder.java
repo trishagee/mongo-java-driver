@@ -21,23 +21,22 @@ import java.io.InputStream;
 import org.bson.BasicBSONDecoder;
 
 /**
- *
  * @author antoine
  */
 public class DefaultDBDecoder extends BasicBSONDecoder implements DBDecoder {
 
     static class DefaultFactory implements DBDecoderFactory {
         @Override
-        public DBDecoder create( ){
-            return new DefaultDBDecoder( );
+        public DBDecoder create() {
+            return new DefaultDBDecoder();
         }
     }
 
     public static DBDecoderFactory FACTORY = new DefaultFactory();
 
-    public DefaultDBDecoder( ){
+    public DefaultDBDecoder() {
     }
-        
+
     public DBCallback getDBCallback(DBCollection collection) {
         // brand new callback every time
         return new DefaultDBCallback(collection);
@@ -50,7 +49,7 @@ public class DefaultDBDecoder extends BasicBSONDecoder implements DBDecoder {
         return (DBObject) cbk.get();
     }
 
-    public DBObject decode(InputStream in,  DBCollection collection) throws IOException {
+    public DBObject decode(InputStream in, DBCollection collection) throws IOException {
         DBCallback cbk = getDBCallback(collection);
         cbk.reset();
         decode(in, cbk);

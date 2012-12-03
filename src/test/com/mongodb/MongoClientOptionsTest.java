@@ -1,6 +1,8 @@
 package com.mongodb;
 
 import junit.framework.Assert;
+import org.bson.EncoderDecoderOptions;
+import org.bson.UUIDRepresentation;
 import org.testng.annotations.Test;
 
 import javax.net.SocketFactory;
@@ -103,7 +105,6 @@ public class MongoClientOptionsTest {
 
     }
 
-
     @Test
     public void testBuilderBuild() {
         MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
@@ -152,4 +153,29 @@ public class MongoClientOptionsTest {
         Assert.assertEquals(encoderFactory, options.getDbEncoderFactory());
         Assert.assertEquals(decoderFactory, options.getDbDecoderFactory());
     }
+
+    @Test
+    public void shouldSupportSettingBSONEncoderOptions() {
+        //TODO argh, this isn't a test, it's more of a documentation of a feature.
+        MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+        builder.dbEncoderFactory(new TestEncoderFactory());
+
+        final MongoClientOptions mongoClientOptions = builder.build();
+        final DBEncoder dbEncoder = mongoClientOptions.getDbEncoderFactory().create();
+
+
+    }
+
+    private class TestEncoderFactory implements DBEncoderFactory {
+        @Override
+        public DBEncoder create() {
+            return new DefaultDBEncoder(new EncoderDecoderOptions() {
+                @Override
+                public UUIDRepresentation getUuidRepresentation() {
+                    throw new IllegalStateException("Not implemented yet!");
+                }
+            });
+        }
+    }
+
 }

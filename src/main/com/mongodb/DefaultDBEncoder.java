@@ -31,8 +31,8 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
 
     static class DefaultFactory implements DBEncoderFactory {
         @Override
-        public DBEncoder create( ){
-            return new DefaultDBEncoder( );
+        public DBEncoder create() {
+            return new DefaultDBEncoder();
         }
     }
 
@@ -73,10 +73,12 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
     }
 
-
     public static DBEncoderFactory FACTORY = new DefaultFactory();
 
-    public DefaultDBEncoder( ){
+    public DefaultDBEncoder() {
     }
 
+    public DefaultDBEncoder(final EncoderDecoderOptions _options) {
+        super(_options);
+    }
 }

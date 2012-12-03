@@ -68,6 +68,8 @@ public class BSON {
     public static final byte B_FUNC = 1;
     public static final byte B_BINARY = 2;
     public static final byte B_UUID = 3;
+    public static final byte B_UUID_LEGACY = 3;
+    public static final byte B_UUID_STANDARD = 4;
 
     // ---- regular expression handling ----
 

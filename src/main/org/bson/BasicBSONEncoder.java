@@ -74,11 +74,16 @@ import com.mongodb.DBRefBase;
  */
 @SuppressWarnings("unchecked")
 public class BasicBSONEncoder implements BSONEncoder {
-    
+
     static final boolean DEBUG = false;
 
-    public BasicBSONEncoder(){
+    public BasicBSONEncoder() {
+        //TODO: factory?
+        this(new EncoderDecoderOptions.DefaultOptions());
+    }
 
+    public BasicBSONEncoder(final EncoderDecoderOptions _options) {
+        this._options = _options;
     }
 
     public byte[] encode( BSONObject o ){
@@ -92,26 +97,27 @@ public class BasicBSONEncoder implements BSONEncoder {
     public void set( OutputBuffer out ){
         if ( _buf != null )
             throw new IllegalStateException( "in the middle of something" );
-        
+
         _buf = out;
     }
- 
+
     public void done(){
         _buf = null;
     }
-   
+
     /**
      * @return true if object was handled
      */
     protected boolean handleSpecialObjects( String name , BSONObject o ){
         return false;
     }
-    
+
     protected boolean putSpecial( String name , Object o ){
         return false;
     }
 
-    /** Encodes a <code>BSONObject</code>.
+    /**
+     * Encodes a <code>BSONObject</code>.
      * This is for the higher level api calls
      * @param o the object to encode
      * @return the number of characters in the encoding
@@ -129,16 +135,16 @@ public class BasicBSONEncoder implements BSONEncoder {
             throw new NullPointerException( "can't save a null object" );
 
         if ( DEBUG ) System.out.println( "putObject : " + name + " [" + o.getClass() + "]" + " # keys " + o.keySet().size() );
-        
+
         final int start = _buf.getPosition();
-        
+
         byte myType = OBJECT;
         if ( o instanceof List )
             myType = ARRAY;
 
         if ( handleSpecialObjects( name , o ) )
             return _buf.getPosition() - start;
-        
+
         if ( name != null ){
             _put( myType , name );
         }
@@ -148,49 +154,49 @@ public class BasicBSONEncoder implements BSONEncoder {
 
         List transientFields = null;
         boolean rewriteID = myType == OBJECT && name == null;
-        
+
 
         if ( myType == OBJECT ) {
             if ( rewriteID && o.containsField( "_id" ) )
                 _putObjectField( "_id" , o.get( "_id" ) );
-            
+
             {
                 Object temp = o.get( "_transientFields" );
                 if ( temp instanceof List )
                     transientFields = (List)temp;
             }
         }
-        
+
         //TODO: reduce repeated code below.
         if ( o instanceof Map ){
 	        for ( Entry<String, Object> e : ((Map<String, Object>)o).entrySet() ){
-	        	
+
 	            if ( rewriteID && e.getKey().equals( "_id" ) )
 	                continue;
-	            
+
 	            if ( transientFields != null && transientFields.contains( e.getKey() ) )
 	                continue;
-	            
+
 	            _putObjectField( e.getKey() , e.getValue() );
-	
-	        }        	
+
+	        }
         } else {
 	        for ( String s : o.keySet() ){
-	
+
 	            if ( rewriteID && s.equals( "_id" ) )
 	                continue;
-	            
+
 	            if ( transientFields != null && transientFields.contains( s ) )
 	                continue;
-	            
+
 	            Object val = o.get( s );
-	
+
 	            _putObjectField( s , val );
-	
+
 	        }
         }
         _buf.write( EOO );
-        
+
         _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
         return _buf.getPosition() - start;
     }
@@ -199,15 +205,15 @@ public class BasicBSONEncoder implements BSONEncoder {
 
         if ( name.equals( "_transientFields" ) )
             return;
-        
+
         if ( DEBUG ) System.out.println( "\t put thing : " + name );
-        
+
         if ( name.equals( "$where") && val instanceof String ){
             _put( CODE , name );
             _putValueString( val.toString() );
             return;
         }
-        
+
         val = BSON.applyEncodingHooks( val );
 
         if ( val == null )
@@ -269,50 +275,50 @@ public class BasicBSONEncoder implements BSONEncoder {
         else {
             throw new IllegalArgumentException( "can't serialize " + val.getClass() );
         }
-        
+
     }
-	
+
     private void putArray( String name , Object array ) {
         _put( ARRAY , name );
         final int sizePos = _buf.getPosition();
         _buf.writeInt( 0 );
-                	        
+
         int size = Array.getLength(array);
         for ( int i = 0; i < size; i++ )
             _putObjectField( String.valueOf( i ) , Array.get( array, i ) );
 
         _buf.write( EOO );
-        _buf.writeInt( sizePos , _buf.getPosition() - sizePos ); 
+        _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
     }
-	
+
     private void putIterable( String name , Iterable l ){
         _put( ARRAY , name );
         final int sizePos = _buf.getPosition();
         _buf.writeInt( 0 );
-        
+
         int i=0;
         for ( Object obj: l ) {
             _putObjectField( String.valueOf( i ) , obj );
             i++;
         }
-        	
+
 
         _buf.write( EOO );
-        _buf.writeInt( sizePos , _buf.getPosition() - sizePos );        
+        _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
     }
-    
+
     private void putMap( String name , Map m ){
         _put( OBJECT , name );
         final int sizePos = _buf.getPosition();
         _buf.writeInt( 0 );
-        
+
         for ( Map.Entry entry : (Set<Map.Entry>)m.entrySet() )
             _putObjectField( entry.getKey().toString() , entry.getValue() );
 
         _buf.write( EOO );
         _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
     }
-    
+
 
     protected void putNull( String name ){
         _put( NULL , name );
@@ -327,7 +333,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         _buf.writeInt( ts.getInc() );
         _buf.writeInt( ts.getTime() );
     }
-    
+
     protected void putCodeWScope( String name , CodeWScope code ){
         _put( CODE_W_SCOPE , name );
         int temp = _buf.getPosition();
@@ -373,22 +379,22 @@ public class BasicBSONEncoder implements BSONEncoder {
 	        throw new IllegalArgumentException( "can't serialize " + n.getClass() );
 		}
     }
-    
+
     protected void putBinary( String name , byte[] data ){
         putBinary( name, B_GENERAL, data );
     }
-    
+
     protected void putBinary( String name , Binary val ){
-        putBinary( name, val.getType(), val.getData() );        
+        putBinary( name, val.getType(), val.getData() );
     }
-    
+
     private void putBinary( String name , int type , byte[] data ){
         _put( BINARY , name );
         int totalLen = data.length;
-        
+
         if (type == B_BINARY)
             totalLen += 4;
-        
+
         _buf.writeInt( totalLen );
         _buf.write( type );
         if (type == B_BINARY)
@@ -398,13 +404,12 @@ public class BasicBSONEncoder implements BSONEncoder {
         int after = _buf.getPosition();
         com.mongodb.util.MyAsserts.assertEquals( after - before , data.length );
     }
-    
+
     protected void putUUID( String name , UUID val ){
         _put( BINARY , name );
         _buf.writeInt( 16 );
-        _buf.write( B_UUID );
-        _buf.writeLong( val.getMostSignificantBits());
-        _buf.writeLong( val.getLeastSignificantBits());
+        _buf.write( _options.getUuidRepresentation().getBinaryType() );
+        _buf.write( _options.getUuidRepresentation().getTranslator().toBytes(val) );
     }
 
     protected void putSymbol( String name , Symbol s ){
@@ -427,7 +432,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         _buf.writeIntBE( oid._machine() );
         _buf.writeIntBE( oid._inc() );
     }
-    
+
     private void putPattern( String name, Pattern p ) {
         _put( REGEX , name );
         _put( p.pattern() );
@@ -444,10 +449,10 @@ public class BasicBSONEncoder implements BSONEncoder {
 
 
     // ----------------------------------------------
-    
+
     /**
      * Encodes the type and key.
-     * 
+     *
      */
     protected void _put( byte type , String name ){
         _buf.write( type );
@@ -460,7 +465,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         int strLen = _put( s );
         _buf.writeInt( lenPos , strLen );
     }
-    
+
     void _reset( Buffer b ){
         b.position(0);
         b.limit( b.capacity() );
@@ -499,10 +504,10 @@ public class BasicBSONEncoder implements BSONEncoder {
                 _buf.write( (byte)(0x80 + (c & 0x3f)) );
                 total += 4;
             }
-            
+
             i += Character.charCount(c);
-        }  
-        
+        }
+
         _buf.write( (byte)0 );
         total++;
         return total;
@@ -515,11 +520,12 @@ public class BasicBSONEncoder implements BSONEncoder {
     public void writeLong( long x ){
         _buf.writeLong( x );
     }
-    
+
     public void writeCString( String s ){
         _put( s );
     }
 
+    private final EncoderDecoderOptions _options;
     protected OutputBuffer _buf;
 
 }
