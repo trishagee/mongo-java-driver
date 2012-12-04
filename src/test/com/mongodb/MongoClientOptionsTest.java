@@ -172,7 +172,7 @@ public class MongoClientOptionsTest {
             return new DefaultDBEncoder(new EncoderDecoderOptions() {
                 @Override
                 public UUIDRepresentation getUuidRepresentation() {
-                    throw new IllegalStateException("Not implemented yet!");
+                    return UUIDRepresentation.STANDARD;
                 }
             });
         }

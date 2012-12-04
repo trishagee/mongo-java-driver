@@ -18,6 +18,7 @@ package org.bson;
 import static org.bson.BSON.*;
 
 import java.io.*;
+import java.util.UUID;
 
 import org.bson.io.PoolOutputBuffer;
 import org.bson.types.ObjectId;
@@ -27,6 +28,16 @@ import org.bson.types.ObjectId;
  * Basic implementation of BSONDecoder interface that creates BasicBSONObject instances
  */
 public class BasicBSONDecoder implements BSONDecoder {
+    private EncoderDecoderOptions _options;
+
+    public BasicBSONDecoder() {
+        this(new EncoderDecoderOptions.DefaultOptions());
+    }
+
+    public BasicBSONDecoder(final EncoderDecoderOptions encoderDecoderOptions) {
+        _options = encoderDecoderOptions;
+    }
+
     public BSONObject readObject( byte[] b ){
         try {
             return readObject( new ByteArrayInputStream( b ) );
@@ -234,30 +245,35 @@ public class BasicBSONDecoder implements BSONDecoder {
         final int totalLen = _in.readInt();
         final byte bType = _in.read();
 
-        switch ( bType ){
-        case B_GENERAL: {
+        switch (bType) {
+            case B_GENERAL: {
                 final byte[] data = new byte[totalLen];
-                _in.fill( data );
-                _callback.gotBinary( name, bType, data );
+                _in.fill(data);
+                _callback.gotBinary(name, bType, data);
                 return;
-        }
-        case B_BINARY:
-            final int len = _in.readInt();
-            if ( len + 4 != totalLen )
-                throw new IllegalArgumentException( "bad data size subtype 2 len: " + len + " totalLen: " + totalLen );
+            }
+            case B_BINARY: {
+                final int len = _in.readInt();
+                if (len + 4 != totalLen)
+                    throw new IllegalArgumentException("bad data size subtype 2 len: " + len + " totalLen: " + totalLen);
 
-            final byte [] data = new byte[len];
-            _in.fill( data );
-            _callback.gotBinary( name , bType , data );
-            return;
-        case B_UUID:
-            if ( totalLen != 16 )
-                throw new IllegalArgumentException( "bad data size subtype 3 len: " + totalLen + " != 16");
+                final byte[] data = new byte[len];
+                _in.fill(data);
+                _callback.gotBinary(name, bType, data);
+                return;
+            }
+            case B_UUID_STANDARD:
+            case B_UUID: {
+                if (totalLen != 16)
+                    throw new IllegalArgumentException("bad data size subtype 3 or 4 len: " + totalLen + " != 16");
 
-            final long part1 = _in.readLong();
-            final long part2 = _in.readLong();
-            _callback.gotUUID(name, part1, part2);
-            return;
+                final byte[] data = new byte[totalLen];
+                _in.fill(data);
+
+                final UUID uuid = _options.getUuidRepresentation().getTranslator().fromBytes(data);
+                _callback.gotUUID(name, uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+                return;
+            }
         }
 
         final byte [] data = new byte[totalLen];

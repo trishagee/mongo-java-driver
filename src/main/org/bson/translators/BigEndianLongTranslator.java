@@ -14,6 +14,7 @@ public class BigEndianLongTranslator implements ByteTranslator {
         return bytes;
     }
 
+    @Override
     public UUID fromBytes(byte[] bytes) {
         return new UUID(readLongFromArrayBigEndian(bytes, 0), readLongFromArrayBigEndian(bytes, 8));
 

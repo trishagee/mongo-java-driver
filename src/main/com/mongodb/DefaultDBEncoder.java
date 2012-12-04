@@ -36,6 +36,20 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         }
     }
 
+    public class JavaLegacyUUIDFactory implements DBEncoderFactory {
+        @Override
+        public DBEncoder create() {
+            return new DefaultDBEncoder(new EncoderDecoderOptions() {
+                @Override
+                public UUIDRepresentation getUuidRepresentation() {
+                    return UUIDRepresentation.JAVA_LEGACY;
+                }
+            });
+        }
+    }
+
+
+
     @SuppressWarnings("deprecation")
     protected boolean putSpecial( String name , Object val ){
         if ( val instanceof DBPointer ){
