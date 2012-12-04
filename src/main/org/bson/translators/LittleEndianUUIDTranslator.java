@@ -4,7 +4,12 @@ import org.bson.io.Bits;
 
 import java.util.UUID;
 
-public class LittleEndianLongTranslator implements ByteTranslator {
+/**
+ * Converts byte arrays of length 16 into a UUID and vice versa.  The byte array format is the first 8 bytes are the
+ * most significant bits, encoded in a little endian fashion, and the second 8 bytes are the least significant bits,
+ * also little endian.
+ */
+public class LittleEndianUUIDTranslator implements ByteTranslator<UUID> {
 
     @Override
     public byte[] toBytes(UUID uuid) {
@@ -21,7 +26,7 @@ public class LittleEndianLongTranslator implements ByteTranslator {
     }
 
     private static void writeLongToArrayLittleEndian(byte[] bytes, int offset, long x) {
-        bytes[offset + 0] = (byte) (0xFFL & (x >> 0));
+        bytes[offset] = (byte) (0xFFL & (x));
         bytes[offset + 1] = (byte) (0xFFL & (x >> 8));
         bytes[offset + 2] = (byte) (0xFFL & (x >> 16));
         bytes[offset + 3] = (byte) (0xFFL & (x >> 24));

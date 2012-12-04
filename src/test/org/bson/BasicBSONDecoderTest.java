@@ -57,6 +57,7 @@ public class BasicBSONDecoderTest {
         // Then
         Assert.assertEquals(((BSONObject) callback.get()).get("_id"), expectedUUID);
     }
+
     private class StandardDecoderOptions implements EncoderDecoderOptions {
         public UUIDRepresentation getUuidRepresentation() {
             return UUIDRepresentation.STANDARD;

@@ -18,43 +18,43 @@
 
 package org.bson;
 
-import org.bson.translators.BigEndianLongTranslator;
+import org.bson.translators.BigEndianUUIDTranslator;
 import org.bson.translators.ByteTranslator;
 import org.bson.translators.CSharpUUIDTranslator;
-import org.bson.translators.LittleEndianLongTranslator;
+import org.bson.translators.LittleEndianUUIDTranslator;
+
+import java.util.UUID;
 
 import static org.bson.BSON.B_UUID_LEGACY;
 import static org.bson.BSON.B_UUID_STANDARD;
 
 public enum UUIDRepresentation {
-    //TODO: not going to work because the encoders and decoders aren't mirror images
-    //TODO: write test
     /**
-     * Use the new standard representation for Guids (binary subtype 4 with bytes in network byte order).
+     * The new standard representation for Guids (binary subtype 4 with bytes in network byte order).
      */
-    STANDARD(B_UUID_STANDARD, new BigEndianLongTranslator()),
+    STANDARD(B_UUID_STANDARD, new BigEndianUUIDTranslator()),
     /**
-     * Use the representation used by older versions of the Java driver.
+     * The representation used by older versions of the Java driver.
      */
-    JAVA_LEGACY(B_UUID_LEGACY, new LittleEndianLongTranslator()),
+    JAVA_LEGACY(B_UUID_LEGACY, new LittleEndianUUIDTranslator()),
     /**
-     * Use the representation used by older versions of the Python driver.
+     * The representation used by older versions of the Python driver.
      */
-    PYTHON_LEGACY(B_UUID_LEGACY, new BigEndianLongTranslator()),
+    PYTHON_LEGACY(B_UUID_LEGACY, new BigEndianUUIDTranslator()),
     /**
-     * Use the representation used by older versions of the C# driver (including most community provided C# drivers).
+     * The representation used by older versions of the C# driver (including most community provided C# drivers).
      */
     C_SHARP_LEGACY(B_UUID_LEGACY, new CSharpUUIDTranslator());
 
     private byte binaryType;
-    private ByteTranslator translator;
+    private ByteTranslator<UUID> translator;
 
-    private UUIDRepresentation(final byte binaryType, final ByteTranslator translator) {
+    private UUIDRepresentation(final byte binaryType, final ByteTranslator<UUID> translator) {
         this.binaryType = binaryType;
         this.translator = translator;
     }
 
-    public ByteTranslator getTranslator() {
+    public ByteTranslator<UUID> getTranslator() {
         return translator;
     }
 

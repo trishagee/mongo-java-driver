@@ -7,12 +7,12 @@ import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 
-public class LittleEndianLongTranslatorTest {
+public class LittleEndianUUIDTranslatorTest {
 
     @Test
     public void shouldEncodeLongAsLittleEndian() throws IOException {
         // Given
-        final LittleEndianLongTranslator longTranslator = new LittleEndianLongTranslator();
+        final LittleEndianUUIDTranslator longTranslator = new LittleEndianUUIDTranslator();
 
         // When
         final byte[] actualBytes = longTranslator.toBytes(new UUID(2L, 1L));
@@ -26,7 +26,7 @@ public class LittleEndianLongTranslatorTest {
     @Test
     public void shouldReadLittleEndianEncodedLongs() {
         // Given
-        final LittleEndianLongTranslator longTranslator = new LittleEndianLongTranslator();
+        final LittleEndianUUIDTranslator longTranslator = new LittleEndianUUIDTranslator();
 
         // When
         final byte[] bytesToRead = {2, 0, 0, 0, 0, 0, 0, 0,
