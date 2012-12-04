@@ -18,12 +18,11 @@
 
 package org.bson.io;
 
-import org.bson.*;
-import org.bson.io.*;
-import org.bson.util.*;
-
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PoolOutputBuffer extends OutputBuffer {
 
@@ -37,8 +36,9 @@ public class PoolOutputBuffer extends OutputBuffer {
         _cur.reset();
         _end.reset();
 
-        for ( int i=0; i<_fromPool.size(); i++ )
-            _extra.done( _fromPool.get(i) );
+        for (byte[] a_fromPool : _fromPool) {
+            _extra.done(a_fromPool);
+        }
         _fromPool.clear();
     }
 

@@ -31,7 +31,6 @@ import org.bson.types.ObjectId;
 import org.bson.types.Symbol;
 
 import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,6 @@ import static org.bson.BSON.REGEX;
 import static org.bson.BSON.STRING;
 import static org.bson.BSON.SYMBOL;
 import static org.bson.BSON.TIMESTAMP;
-import static org.bson.BSON.UNDEFINED;
 import static org.bson.BSON.regexFlags;
 
 /**
@@ -106,7 +104,7 @@ public class BasicBSONEncoder implements BSONEncoder {
     /**
      * @return true if object was handled
      */
-    protected boolean handleSpecialObjects( String name , BSONObject o ){
+    protected boolean handleSpecialObjects(){
         return false;
     }
 
@@ -140,7 +138,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         if ( o instanceof List )
             myType = ARRAY;
 
-        if ( handleSpecialObjects( name , o ) )
+        if ( handleSpecialObjects() )
             return _buf.getPosition() - start;
 
         if ( name != null ){
@@ -322,10 +320,6 @@ public class BasicBSONEncoder implements BSONEncoder {
         _put( NULL , name );
     }
 
-    protected void putUndefined(String name){
-        _put(UNDEFINED, name);
-    }
-
     protected void putTimestamp(String name, BSONTimestamp ts ){
         _put( TIMESTAMP , name );
         _buf.writeInt( ts.getInc() );
@@ -343,7 +337,7 @@ public class BasicBSONEncoder implements BSONEncoder {
 
     protected void putCode( String name , Code code ){
         _put( CODE , name );
-        int temp = _buf.getPosition();
+        _buf.getPosition();
         _putValueString( code.getCode() );
     }
 
@@ -462,11 +456,6 @@ public class BasicBSONEncoder implements BSONEncoder {
         _buf.writeInt( 0 ); // making space for size
         int strLen = _put( s );
         _buf.writeInt( lenPos , strLen );
-    }
-
-    void _reset( Buffer b ){
-        b.position(0);
-        b.limit( b.capacity() );
     }
 
     /**
