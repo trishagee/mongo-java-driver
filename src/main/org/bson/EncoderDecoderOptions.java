@@ -27,7 +27,6 @@ public interface EncoderDecoderOptions {
     UUIDRepresentation getUuidRepresentation();
 
     class DefaultOptions implements EncoderDecoderOptions {
-        //TODO: is this correct?
         private final UUIDRepresentation uuidRepresentation = UUIDRepresentation.JAVA_LEGACY;
 
         @Override

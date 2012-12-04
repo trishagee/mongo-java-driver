@@ -55,6 +55,7 @@ public class MongoClientOptions {
         private WriteConcern writeConcern = WriteConcern.ACKNOWLEDGED;
         private SocketFactory socketFactory = SocketFactory.getDefault();
         private boolean cursorFinalizerEnabled = true;
+        //TODO - these need to be used, so we need tests to drive this
         private EncoderDecoderOptions encoderDecoderOptions;
 
         /**

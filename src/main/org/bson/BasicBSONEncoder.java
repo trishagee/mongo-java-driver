@@ -21,6 +21,7 @@ package org.bson;
 import com.mongodb.DBRefBase;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.OutputBuffer;
+import org.bson.options.JavaLegacyUUIDPolicy;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
@@ -73,11 +74,17 @@ public class BasicBSONEncoder implements BSONEncoder {
 
     static final boolean DEBUG = false;
 
+    /**
+     * Defaults to using the Java Legacy UUID encoder.
+     */
     public BasicBSONEncoder() {
-        //TODO: factory?
-        this(new EncoderDecoderOptions.DefaultOptions());
+        this(JavaLegacyUUIDPolicy.INSTANCE);
     }
 
+    /**
+     * Set the EncoderDecoderOptions for this Encoder.  Either implement the interface with the encoding options
+     * required, or pick from one of the pre-defined policies in org.bson.options.
+     */
     public BasicBSONEncoder(final EncoderDecoderOptions _options) {
         this._options = _options;
     }

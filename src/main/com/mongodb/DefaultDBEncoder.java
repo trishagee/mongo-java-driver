@@ -12,6 +12,7 @@
  */
 package com.mongodb;
 
+import org.bson.options.JavaLegacyUUIDPolicy;
 import org.bson.*;
 import org.bson.io.*;
 import static org.bson.BSON.EOO;
@@ -32,23 +33,9 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
     static class DefaultFactory implements DBEncoderFactory {
         @Override
         public DBEncoder create() {
-            return new DefaultDBEncoder();
+            return new DefaultDBEncoder(JavaLegacyUUIDPolicy.INSTANCE);
         }
     }
-
-    public class JavaLegacyUUIDFactory implements DBEncoderFactory {
-        @Override
-        public DBEncoder create() {
-            return new DefaultDBEncoder(new EncoderDecoderOptions() {
-                @Override
-                public UUIDRepresentation getUuidRepresentation() {
-                    return UUIDRepresentation.JAVA_LEGACY;
-                }
-            });
-        }
-    }
-
-
 
     @SuppressWarnings("deprecation")
     protected boolean putSpecial( String name , Object val ){
@@ -90,6 +77,7 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
     public static DBEncoderFactory FACTORY = new DefaultFactory();
 
     public DefaultDBEncoder() {
+        super();
     }
 
     public DefaultDBEncoder(final EncoderDecoderOptions _options) {
