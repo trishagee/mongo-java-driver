@@ -15,27 +15,63 @@
  */
 package org.bson;
 
-import static org.bson.BSON.*;
+import org.bson.io.PoolOutputBuffer;
+import org.bson.options.BSONOptions;
+import org.bson.options.JavaLegacyUUIDPolicy;
+import org.bson.types.ObjectId;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
-import org.bson.io.PoolOutputBuffer;
-import org.bson.types.ObjectId;
+import static org.bson.BSON.ARRAY;
+import static org.bson.BSON.BINARY;
+import static org.bson.BSON.BOOLEAN;
+import static org.bson.BSON.B_BINARY;
+import static org.bson.BSON.B_GENERAL;
+import static org.bson.BSON.B_UUID;
+import static org.bson.BSON.B_UUID_STANDARD;
+import static org.bson.BSON.CODE;
+import static org.bson.BSON.CODE_W_SCOPE;
+import static org.bson.BSON.DATE;
+import static org.bson.BSON.EOO;
+import static org.bson.BSON.MAXKEY;
+import static org.bson.BSON.MINKEY;
+import static org.bson.BSON.NULL;
+import static org.bson.BSON.NUMBER;
+import static org.bson.BSON.NUMBER_INT;
+import static org.bson.BSON.NUMBER_LONG;
+import static org.bson.BSON.OBJECT;
+import static org.bson.BSON.OID;
+import static org.bson.BSON.REF;
+import static org.bson.BSON.REGEX;
+import static org.bson.BSON.STRING;
+import static org.bson.BSON.SYMBOL;
+import static org.bson.BSON.TIMESTAMP;
+import static org.bson.BSON.UNDEFINED;
 
 
 /**
- * Basic implementation of BSONDecoder interface that creates BasicBSONObject instances
+ * Basic implementation of BSONDecoder interface that creates BasicBSONObject instances.  Contains an optional
+ * constructor that lets you set the BSONOptions for this decoder to use.
  */
 public class BasicBSONDecoder implements BSONDecoder {
-    private EncoderDecoderOptions _options;
+    private final BSONOptions _options;
 
+    /**
+     * Defaults to using the Java Legacy UUID encoder.
+     */
     public BasicBSONDecoder() {
-        this(new EncoderDecoderOptions.DefaultOptions());
+        this(JavaLegacyUUIDPolicy.INSTANCE);
     }
 
-    public BasicBSONDecoder(final EncoderDecoderOptions encoderDecoderOptions) {
-        _options = encoderDecoderOptions;
+    /**
+     * Set the BSONOptions for this Encoder.  Either implement the interface with the encoding options
+     * required, or pick from one of the pre-defined policies in org.bson.options.
+     */
+    public BasicBSONDecoder(final BSONOptions BSONOptions) {
+        _options = BSONOptions;
     }
 
     public BSONObject readObject( byte[] b ){

@@ -1,7 +1,7 @@
 package com.mongodb;
 
 import junit.framework.Assert;
-import org.bson.EncoderDecoderOptions;
+import org.bson.options.BSONOptions;
 import org.bson.UUIDRepresentation;
 import org.testng.annotations.Test;
 
@@ -169,7 +169,7 @@ public class MongoClientOptionsTest {
     private class TestEncoderFactory implements DBEncoderFactory {
         @Override
         public DBEncoder create() {
-            return new DefaultDBEncoder(new EncoderDecoderOptions() {
+            return new DefaultDBEncoder(new BSONOptions() {
                 @Override
                 public UUIDRepresentation getUuidRepresentation() {
                     return UUIDRepresentation.STANDARD;

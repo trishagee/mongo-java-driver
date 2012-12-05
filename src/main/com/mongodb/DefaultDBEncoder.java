@@ -12,13 +12,16 @@
  */
 package com.mongodb;
 
+import org.bson.BSONObject;
+import org.bson.BasicBSONEncoder;
+import org.bson.io.OutputBuffer;
+import org.bson.options.BSONOptions;
 import org.bson.options.JavaLegacyUUIDPolicy;
-import org.bson.*;
-import org.bson.io.*;
+import org.bson.types.ObjectId;
+
 import static org.bson.BSON.EOO;
 import static org.bson.BSON.OBJECT;
 import static org.bson.BSON.REF;
-import org.bson.types.*;
 
 
 public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
@@ -80,7 +83,7 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         super();
     }
 
-    public DefaultDBEncoder(final EncoderDecoderOptions _options) {
+    public DefaultDBEncoder(final BSONOptions _options) {
         super(_options);
     }
 }

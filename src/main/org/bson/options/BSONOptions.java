@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package org.bson;
+package org.bson.options;
+
+import org.bson.UUIDRepresentation;
 
 /**
  * Options needed to control behavior of DBEncoder and DBDecoder implementations.  These are separate from
  * MongoClientOptions because this is at the BSON layer, which is lower-level than MongoDB.
  *
- * By default, the Java Driver uses the UUIDRepresentation.JAVA_LEGACY UUID representation.  Eventually the Java
- * Driver will move to using the Standard encoder
  */
-public interface EncoderDecoderOptions {
+public interface BSONOptions {
     UUIDRepresentation getUuidRepresentation();
-
-    class DefaultOptions implements EncoderDecoderOptions {
-        private final UUIDRepresentation uuidRepresentation = UUIDRepresentation.JAVA_LEGACY;
-
-        @Override
-        public UUIDRepresentation getUuidRepresentation() {
-            return uuidRepresentation;
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package org.bson;
 
 import org.bson.io.BasicOutputBuffer;
+import org.bson.options.BSONOptions;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -68,7 +69,7 @@ public class BasicBSONEncoderTest {
 
     }
 
-    private class StandardEncoderOptions implements EncoderDecoderOptions {
+    private class StandardEncoderOptions implements BSONOptions {
         public UUIDRepresentation getUuidRepresentation() {
             return UUIDRepresentation.STANDARD;
         }

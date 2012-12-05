@@ -17,7 +17,7 @@
 
 package com.mongodb;
 
-import org.bson.EncoderDecoderOptions;
+import org.bson.options.BSONOptions;
 import org.bson.util.annotations.Immutable;
 
 import javax.net.SocketFactory;
@@ -56,7 +56,7 @@ public class MongoClientOptions {
         private SocketFactory socketFactory = SocketFactory.getDefault();
         private boolean cursorFinalizerEnabled = true;
         //TODO - these need to be used, so we need tests to drive this
-        private EncoderDecoderOptions encoderDecoderOptions;
+        private BSONOptions BSONOptions;
 
         /**
          * Sets the description.
@@ -279,16 +279,16 @@ public class MongoClientOptions {
         /**
          * Sets whether cursor finalizers are enabled.
          *
-         * @param encoderDecoderOptions alternative BSON encoders and decoders.  Specifically, UUID.
+         * @param BSONOptions alternative BSON encoders and decoders.  Specifically, UUID.
          *
          * @return {@code this}
          * @see //TODO
          */
-        public Builder encoderDecoderOptions(final EncoderDecoderOptions encoderDecoderOptions) {
-            if (encoderDecoderOptions == null) {
+        public Builder encoderDecoderOptions(final BSONOptions BSONOptions) {
+            if (BSONOptions == null) {
                 throw new IllegalArgumentException("null is not a legal value");
             }
-            this.encoderDecoderOptions = encoderDecoderOptions;
+            this.BSONOptions = BSONOptions;
             return this;
         }
 

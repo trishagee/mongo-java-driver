@@ -21,6 +21,7 @@ package org.bson;
 import com.mongodb.DBRefBase;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.OutputBuffer;
+import org.bson.options.BSONOptions;
 import org.bson.options.JavaLegacyUUIDPolicy;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
@@ -82,10 +83,10 @@ public class BasicBSONEncoder implements BSONEncoder {
     }
 
     /**
-     * Set the EncoderDecoderOptions for this Encoder.  Either implement the interface with the encoding options
+     * Set the BSONOptions for this Encoder.  Either implement the interface with the encoding options
      * required, or pick from one of the pre-defined policies in org.bson.options.
      */
-    public BasicBSONEncoder(final EncoderDecoderOptions _options) {
+    public BasicBSONEncoder(final BSONOptions _options) {
         this._options = _options;
     }
 
@@ -519,7 +520,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         _put( s );
     }
 
-    private final EncoderDecoderOptions _options;
+    private final BSONOptions _options;
     protected OutputBuffer _buf;
 
 }
