@@ -40,6 +40,19 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         }
     }
 
+    static class BSONOptionsEncoderFactory implements DBEncoderFactory {
+        private final BSONOptions options;
+
+        public BSONOptionsEncoderFactory(final BSONOptions options) {
+            this.options = options;
+        }
+
+        @Override
+        public DBEncoder create() {
+            return new DefaultDBEncoder(options);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     protected boolean putSpecial( String name , Object val ){
         if ( val instanceof DBPointer ){

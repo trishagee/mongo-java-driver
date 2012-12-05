@@ -15,11 +15,8 @@
  */
 package com.mongodb;
 
-/**
- *
- */
 public interface DBDecoderFactory {
 
-    public DBDecoder create( );
-    
+    public DBDecoder create();
+
 }

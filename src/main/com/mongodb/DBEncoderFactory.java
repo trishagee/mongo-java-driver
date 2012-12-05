@@ -15,11 +15,8 @@
  */
 package com.mongodb;
 
-/**
- *
- */
 public interface DBEncoderFactory {
 
     public DBEncoder create();
-    
+
 }

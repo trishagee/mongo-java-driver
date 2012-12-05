@@ -55,8 +55,6 @@ public class MongoClientOptions {
         private WriteConcern writeConcern = WriteConcern.ACKNOWLEDGED;
         private SocketFactory socketFactory = SocketFactory.getDefault();
         private boolean cursorFinalizerEnabled = true;
-        //TODO - these need to be used, so we need tests to drive this
-        private BSONOptions BSONOptions;
 
         /**
          * Sets the description.
@@ -277,18 +275,20 @@ public class MongoClientOptions {
         }
 
         /**
-         * Sets whether cursor finalizers are enabled.
+         * Sets BSONOptions for the DBEncoderFactory to use.  Note that if you should set this OR the
+         * DBEncoderFactory / DBDecoderFactory, as calling this method creates new encoder and decoder
+         * factories.
          *
-         * @param BSONOptions alternative BSON encoders and decoders.  Specifically, UUID.
+         * @param bsonOptions options for the BSON encoders and decoders.  Specifically, UUIDRepresentation.
          *
          * @return {@code this}
-         * @see //TODO
          */
-        public Builder encoderDecoderOptions(final BSONOptions BSONOptions) {
-            if (BSONOptions == null) {
+        public Builder bsonOptions(final BSONOptions bsonOptions) {
+            if (bsonOptions == null) {
                 throw new IllegalArgumentException("null is not a legal value");
             }
-            this.BSONOptions = BSONOptions;
+            this.dbEncoderFactory(new DefaultDBEncoder.BSONOptionsEncoderFactory(bsonOptions));
+            this.dbDecoderFactory(new DefaultDBDecoder.BSONOptionsDecoderFactory(bsonOptions));
             return this;
         }
 
