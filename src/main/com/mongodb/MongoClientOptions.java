@@ -17,7 +17,6 @@
 
 package com.mongodb;
 
-import org.bson.options.BSONOptions;
 import org.bson.util.annotations.Immutable;
 
 import javax.net.SocketFactory;
@@ -271,24 +270,6 @@ public class MongoClientOptions {
          */
         public Builder cursorFinalizerEnabled(final boolean cursorFinalizerEnabled) {
             this.cursorFinalizerEnabled = cursorFinalizerEnabled;
-            return this;
-        }
-
-        /**
-         * Sets BSONOptions for the DBEncoderFactory to use.  Note that if you should set this OR the
-         * DBEncoderFactory / DBDecoderFactory, as calling this method creates new encoder and decoder
-         * factories.
-         *
-         * @param bsonOptions options for the BSON encoders and decoders.  Specifically, UUIDRepresentation.
-         *
-         * @return {@code this}
-         */
-        public Builder bsonOptions(final BSONOptions bsonOptions) {
-            if (bsonOptions == null) {
-                throw new IllegalArgumentException("null is not a legal value");
-            }
-            this.dbEncoderFactory(new DefaultDBEncoder.BSONOptionsEncoderFactory(bsonOptions));
-            this.dbDecoderFactory(new DefaultDBDecoder.BSONOptionsDecoderFactory(bsonOptions));
             return this;
         }
 

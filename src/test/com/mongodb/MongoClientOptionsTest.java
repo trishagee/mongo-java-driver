@@ -163,7 +163,7 @@ public class MongoClientOptionsTest {
     public void shouldUseSuppliedBSONOptionsForEncoding() {
         final MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
         final StubBSONOptions bsonOptions = new StubBSONOptions();
-        builder.bsonOptions(bsonOptions);
+        builder.dbEncoderFactory(new DefaultDBEncoderFactory(bsonOptions));
 
         final MongoClientOptions mongoClientOptions = builder.build();
         final DBEncoder dbEncoder = mongoClientOptions.getDbEncoderFactory().create();
@@ -177,7 +177,7 @@ public class MongoClientOptionsTest {
     public void shouldUseSuppliedBSONOptionsForDecoding() {
         final MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
         final StubBSONOptions bsonOptions = new StubBSONOptions();
-        builder.bsonOptions(bsonOptions);
+        builder.dbDecoderFactory(new DefaultDBDecoderFactory(bsonOptions));
 
         final MongoClientOptions mongoClientOptions = builder.build();
         final DBDecoder dbEncoder = mongoClientOptions.getDbDecoderFactory().create();

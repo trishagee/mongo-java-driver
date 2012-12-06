@@ -17,12 +17,13 @@ package com.mongodb;
 
 import org.bson.BasicBSONDecoder;
 import org.bson.options.BSONOptions;
-import org.bson.options.JavaLegacyUUIDPolicy;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class DefaultDBDecoder extends BasicBSONDecoder implements DBDecoder {
+
+    public static DBDecoderFactory FACTORY = new DefaultDBDecoderFactory();
 
     public DefaultDBDecoder() {
         super();
@@ -31,8 +32,6 @@ public class DefaultDBDecoder extends BasicBSONDecoder implements DBDecoder {
     public DefaultDBDecoder(final BSONOptions options) {
         super(options);
     }
-
-    public static DBDecoderFactory FACTORY = new DefaultFactory();
 
     public DBCallback getDBCallback(DBCollection collection) {
         // brand new callback every time
@@ -51,25 +50,5 @@ public class DefaultDBDecoder extends BasicBSONDecoder implements DBDecoder {
         cbk.reset();
         decode(in, cbk);
         return (DBObject) cbk.get();
-    }
-
-    static class DefaultFactory implements DBDecoderFactory {
-        @Override
-        public DBDecoder create() {
-            return new DefaultDBDecoder(JavaLegacyUUIDPolicy.INSTANCE);
-        }
-    }
-
-    static class BSONOptionsDecoderFactory implements DBDecoderFactory {
-        private final BSONOptions options;
-
-        public BSONOptionsDecoderFactory(final BSONOptions options) {
-            this.options = options;
-        }
-
-        @Override
-        public DBDecoder create() {
-            return new DefaultDBDecoder(options);
-        }
     }
 }

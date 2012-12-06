@@ -15,8 +15,18 @@
  */
 package com.mongodb;
 
+/**
+ * Use this factory to create a DBDecoder that decodes messages from the MongoDB server.  Implement this factory
+ * to wire in custom decoding functionality.
+ *
+ * @see DefaultDBDecoderFactory
+ */
 public interface DBDecoderFactory {
 
+    /**
+     * Create a DBDecoder for the driver to use when decoding messages from the mongo server
+     * @return a DBDecoder
+     */
     public DBDecoder create();
 
 }

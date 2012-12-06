@@ -16,7 +16,6 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
 import org.bson.io.OutputBuffer;
 import org.bson.options.BSONOptions;
-import org.bson.options.JavaLegacyUUIDPolicy;
 import org.bson.types.ObjectId;
 
 import static org.bson.BSON.EOO;
@@ -31,26 +30,6 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         int x = super.putObject( o );
         done();
         return x;
-    }
-
-    static class DefaultFactory implements DBEncoderFactory {
-        @Override
-        public DBEncoder create() {
-            return new DefaultDBEncoder(JavaLegacyUUIDPolicy.INSTANCE);
-        }
-    }
-
-    static class BSONOptionsEncoderFactory implements DBEncoderFactory {
-        private final BSONOptions options;
-
-        public BSONOptionsEncoderFactory(final BSONOptions options) {
-            this.options = options;
-        }
-
-        @Override
-        public DBEncoder create() {
-            return new DefaultDBEncoder(options);
-        }
     }
 
     @SuppressWarnings("deprecation")
@@ -90,7 +69,7 @@ public class DefaultDBEncoder extends BasicBSONEncoder implements DBEncoder {
         _buf.writeInt( sizePos , _buf.getPosition() - sizePos );
     }
 
-    public static DBEncoderFactory FACTORY = new DefaultFactory();
+    public static DBEncoderFactory FACTORY = new DefaultDBEncoderFactory();
 
     public DefaultDBEncoder() {
         super();
