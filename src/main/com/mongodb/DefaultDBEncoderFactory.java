@@ -17,7 +17,6 @@
 package com.mongodb;
 
 import org.bson.options.BSONOptions;
-import org.bson.options.DefaultBSONOptions;
 
 /**
  * Default implementation of DBEncoderFactory that creates a DefaultDBEncoder for encoding messages to the
@@ -31,14 +30,16 @@ public class DefaultDBEncoderFactory implements DBEncoderFactory {
 
     /**
      * Uses the default BSONOptions when creating a DBEncoder
-     * @see DefaultBSONOptions
+     *
+     * @see BSONOptions
      */
     public DefaultDBEncoderFactory() {
-        this(new DefaultBSONOptions.Builder().build());
+        this(new BSONOptions.Builder().build());
     }
 
     /**
      * Use the provided BSONOptions when creating DBEncoder.
+     *
      * @param options the specific BSONOptions for the encoder to use.
      */
     public DefaultDBEncoderFactory(final BSONOptions options) {

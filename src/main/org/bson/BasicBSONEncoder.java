@@ -20,7 +20,6 @@ import com.mongodb.DBRefBase;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.OutputBuffer;
 import org.bson.options.BSONOptions;
-import org.bson.options.DefaultBSONOptions;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
@@ -75,10 +74,10 @@ public class BasicBSONEncoder implements BSONEncoder {
 
     /**
      * Uses the default BSONOptions
-     * @see DefaultBSONOptions
+     * @see BSONOptions
      */
     public BasicBSONEncoder() {
-        this(new DefaultBSONOptions.Builder().build());
+        this(new BSONOptions.Builder().build());
     }
 
     /**

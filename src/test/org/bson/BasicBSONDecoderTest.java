@@ -23,6 +23,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.UUID;
 
+import static org.bson.UUIDRepresentation.STANDARD;
+
 public class BasicBSONDecoderTest {
 
     @Test
@@ -53,7 +55,8 @@ public class BasicBSONDecoderTest {
     @Test
     public void shouldUseTheProvidedUUIDRepresentationToDecodeUUIDs() throws IOException {
         // Given
-        final BasicBSONDecoder bsonDecoder = new BasicBSONDecoder(new StandardDecoderOptions());
+        final BSONOptions bsonOptions = new BSONOptions.Builder().uuidRepresentation(STANDARD).build();
+        final BasicBSONDecoder bsonDecoder = new BasicBSONDecoder(bsonOptions);
 
         final UUID expectedUUID = new UUID(2, 1);
 
@@ -73,11 +76,5 @@ public class BasicBSONDecoderTest {
 
         // Then
         Assert.assertEquals(((BSONObject) callback.get()).get("_id"), expectedUUID);
-    }
-
-    private class StandardDecoderOptions implements BSONOptions {
-        public UUIDRepresentation getUUIDRepresentation() {
-            return UUIDRepresentation.STANDARD;
-        }
     }
 }

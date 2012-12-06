@@ -17,7 +17,6 @@
 package com.mongodb;
 
 import org.bson.options.BSONOptions;
-import org.bson.options.DefaultBSONOptions;
 
 /**
  * Default implementation of the DBDecoderFactory that optionally takes BSONOptions to pass onto the Decoder.
@@ -30,14 +29,16 @@ public class DefaultDBDecoderFactory implements DBDecoderFactory {
 
     /**
      * Create a DBDecoderFactory with the default BSONOptions settings.
-     * @see DefaultBSONOptions
+     *
+     * @see BSONOptions
      */
     public DefaultDBDecoderFactory() {
-        this(new DefaultBSONOptions.Builder().build());
+        this(new BSONOptions.Builder().build());
     }
 
     /**
      * Takes a set of options to pass on to the created DBDecoderFactory
+     *
      * @param options the set of options for the decoder to use
      */
     public DefaultDBDecoderFactory(final BSONOptions options) {

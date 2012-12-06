@@ -21,16 +21,16 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
-public class DefaultBSONOptionsTest {
+public class BSONOptionsTest {
     @Test
     public void shouldUseSuppliedUUIDRepresentation() {
         // Given
         final UUIDRepresentation expectedUUIDRepresentation = UUIDRepresentation.STANDARD;
 
         // When
-        final DefaultBSONOptions.Builder builder = new DefaultBSONOptions.Builder();
+        final BSONOptions.Builder builder = new BSONOptions.Builder();
         builder.uuidRepresentation(expectedUUIDRepresentation);
-        final DefaultBSONOptions bsonOptions = builder.build();
+        final BSONOptions bsonOptions = builder.build();
 
         // Then
         assertEquals(bsonOptions.getUUIDRepresentation(), expectedUUIDRepresentation);
@@ -40,7 +40,7 @@ public class DefaultBSONOptionsTest {
     public void shouldDefaultToJavaUUIDRepresentation() {
 
         // When
-        final DefaultBSONOptions bsonOptions = new DefaultBSONOptions.Builder().build();
+        final BSONOptions bsonOptions = new BSONOptions.Builder().build();
 
         // Then
         assertEquals(bsonOptions.getUUIDRepresentation(), UUIDRepresentation.JAVA_LEGACY);

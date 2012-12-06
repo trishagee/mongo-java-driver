@@ -17,7 +17,6 @@ package org.bson;
 
 import org.bson.io.PoolOutputBuffer;
 import org.bson.options.BSONOptions;
-import org.bson.options.DefaultBSONOptions;
 import org.bson.types.ObjectId;
 
 import java.io.ByteArrayInputStream;
@@ -60,16 +59,18 @@ public class BasicBSONDecoder implements BSONDecoder {
     private final BSONOptions _options;
 
     /**
-     * Uses default BSONOptions
-     * @see DefaultBSONOptions
+     * Use default BSONOptions
+     *
+     * @see BSONOptions
      */
     public BasicBSONDecoder() {
-        this(new DefaultBSONOptions.Builder().build());
+        this(new BSONOptions.Builder().build());
     }
 
     /**
-     * Set the BSONOptions for this Encoder.  Either implement the interface with the encoding options
-     * required, or use DefaultBSONOptions.Builder to build up the settings you require.
+     * Set the BSONOptions for this Encoder.
+     *
+     * @see BSONOptions
      */
     public BasicBSONDecoder(final BSONOptions BSONOptions) {
         _options = BSONOptions;

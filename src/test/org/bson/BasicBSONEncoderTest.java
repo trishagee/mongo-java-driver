@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static org.bson.UUIDRepresentation.STANDARD;
+
 public class BasicBSONEncoderTest {
     @Test
     public void shouldUseTheJavaLegacyRepresentationToEncodeUUIDsByDefault() throws IOException {
@@ -58,7 +60,8 @@ public class BasicBSONEncoderTest {
     @Test
     public void shouldUseTheProvidedUUIDRepresentationToEncodeUUIDs() throws IOException {
         // Given
-        final BasicBSONEncoder bsonEncoder = new BasicBSONEncoder(new StandardEncoderOptions());
+        final BSONOptions bsonOptions = new BSONOptions.Builder().uuidRepresentation(STANDARD).build();
+        final BasicBSONEncoder bsonEncoder = new BasicBSONEncoder(bsonOptions);
 
         final BasicOutputBuffer actualBuffer = new BasicOutputBuffer();
         bsonEncoder.set(actualBuffer);
@@ -84,11 +87,4 @@ public class BasicBSONEncoderTest {
                 0, 0, 0, 0, 0, 0, 0, 1)); //8 bytes for long, 2 longs for UUID, Big Endian for Standard encoding
 
     }
-
-    private class StandardEncoderOptions implements BSONOptions {
-        public UUIDRepresentation getUUIDRepresentation() {
-            return UUIDRepresentation.STANDARD;
-        }
-    }
-
 }

@@ -17,16 +17,10 @@
 package com.mongodb;
 
 import junit.framework.Assert;
-import org.bson.UUIDRepresentation;
-import org.bson.io.BasicOutputBuffer;
-import org.bson.options.BSONOptions;
 import org.testng.annotations.Test;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import java.util.UUID;
-
-import static junit.framework.Assert.assertTrue;
 
 public class MongoClientOptionsTest {
 
@@ -156,54 +150,5 @@ public class MongoClientOptionsTest {
         Assert.assertEquals(socketFactory, options.getSocketFactory());
         Assert.assertEquals(encoderFactory, options.getDbEncoderFactory());
         Assert.assertEquals(decoderFactory, options.getDbDecoderFactory());
-    }
-
-    @Test
-    public void shouldUseSuppliedBSONOptionsForEncoding() {
-        final StubBSONOptions bsonOptions = new StubBSONOptions();
-
-        final MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-        builder.dbEncoderFactory(new DefaultDBEncoderFactory(bsonOptions));
-
-        final MongoClientOptions mongoClientOptions = builder.build();
-        final DBEncoder dbEncoder = mongoClientOptions.getDbEncoderFactory().create();
-        dbEncoder.writeObject(new BasicOutputBuffer(), new BasicDBObject("_id", new UUID(3, 4)));
-
-        //poor man's mocking - if this flag is set, then the BSONOptions I passed in are being used when we encode
-        assertTrue(bsonOptions.getUuidRepresentationCalled);
-    }
-
-    @Test
-    public void shouldUseSuppliedBSONOptionsForDecoding() {
-        final StubBSONOptions bsonOptions = new StubBSONOptions();
-
-        final MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-        builder.dbDecoderFactory(new DefaultDBDecoderFactory(bsonOptions));
-
-        final MongoClientOptions mongoClientOptions = builder.build();
-        final DBDecoder dbEncoder = mongoClientOptions.getDbDecoderFactory().create();
-        final byte[] binaryTypeWithUUIDAsBytes = {
-                31, 0, 0, 0,            // message length
-                5,                      // type (BINARY)
-                95, 105, 100, 0,        // "_id"
-                16, 0, 0, 0,            // int "16" (length)
-                4,                      // type (B_UUID_STANDARD)
-                2, 0, 0, 0, 0, 0, 0, 0, //
-                1, 0, 0, 0, 0, 0, 0, 0, // 8 bytes for long, 2 longs for UUID, Little Endian for Default (Java) encoding
-                0};                     // EOM
-        dbEncoder.decode(binaryTypeWithUUIDAsBytes, new DefaultDBCallback(null));
-
-        // poor man's mocking - if this flag is set, then the BSONOptions I passed in are being used when we decode
-        assertTrue(bsonOptions.getUuidRepresentationCalled);
-    }
-
-    private class StubBSONOptions implements BSONOptions {
-        private boolean getUuidRepresentationCalled = false;
-
-        @Override
-        public UUIDRepresentation getUUIDRepresentation() {
-            getUuidRepresentationCalled = true;
-            return UUIDRepresentation.STANDARD;
-        }
     }
 }
