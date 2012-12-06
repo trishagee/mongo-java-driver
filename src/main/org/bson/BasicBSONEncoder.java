@@ -1,19 +1,17 @@
-// BSONEncoder.java
-
-/**
- *      Copyright (C) 2008 10gen Inc.
+/*
+ * Copyright (c) 2008 - 2012 10gen, Inc. <http://10gen.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package org.bson;
@@ -22,7 +20,7 @@ import com.mongodb.DBRefBase;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.OutputBuffer;
 import org.bson.options.BSONOptions;
-import org.bson.options.JavaLegacyUUIDPolicy;
+import org.bson.options.DefaultBSONOptions;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
@@ -76,15 +74,16 @@ public class BasicBSONEncoder implements BSONEncoder {
     static final boolean DEBUG = false;
 
     /**
-     * Defaults to using the Java Legacy UUID encoder.
+     * Uses the default BSONOptions
+     * @see DefaultBSONOptions
      */
     public BasicBSONEncoder() {
-        this(JavaLegacyUUIDPolicy.INSTANCE);
+        this(new DefaultBSONOptions.Builder().build());
     }
 
     /**
      * Set the BSONOptions for this Encoder.  Either implement the interface with the encoding options
-     * required, or pick from one of the pre-defined policies in org.bson.options.
+     * required, or use DefaultBSONOptions.Builder to build up the options you need.
      */
     public BasicBSONEncoder(final BSONOptions _options) {
         this._options = _options;
@@ -173,31 +172,31 @@ public class BasicBSONEncoder implements BSONEncoder {
 
         //TODO: reduce repeated code below.
         if ( o instanceof Map ){
-	        for ( Entry<String, Object> e : ((Map<String, Object>)o).entrySet() ){
+            for ( Entry<String, Object> e : ((Map<String, Object>)o).entrySet() ){
 
-	            if ( rewriteID && e.getKey().equals( "_id" ) )
-	                continue;
+                if ( rewriteID && e.getKey().equals( "_id" ) )
+                    continue;
 
-	            if ( transientFields != null && transientFields.contains( e.getKey() ) )
-	                continue;
+                if ( transientFields != null && transientFields.contains( e.getKey() ) )
+                    continue;
 
-	            _putObjectField( e.getKey() , e.getValue() );
+                _putObjectField( e.getKey() , e.getValue() );
 
-	        }
+            }
         } else {
-	        for ( String s : o.keySet() ){
+            for ( String s : o.keySet() ){
 
-	            if ( rewriteID && s.equals( "_id" ) )
-	                continue;
+                if ( rewriteID && s.equals( "_id" ) )
+                    continue;
 
-	            if ( transientFields != null && transientFields.contains( s ) )
-	                continue;
+                if ( transientFields != null && transientFields.contains( s ) )
+                    continue;
 
-	            Object val = o.get( s );
+                Object val = o.get( s );
 
-	            _putObjectField( s , val );
+                _putObjectField( s , val );
 
-	        }
+            }
         }
         _buf.write( EOO );
 
@@ -205,7 +204,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         return _buf.getPosition() - start;
     }
 
-	protected void _putObjectField( String name , Object val ){
+    protected void _putObjectField( String name , Object val ){
 
         if ( name.equals( "_transientFields" ) )
             return;
@@ -249,7 +248,7 @@ public class BasicBSONEncoder implements BSONEncoder {
         else if ( val instanceof UUID )
             putUUID( name , (UUID)val );
         else if ( val.getClass().isArray() )
-        	putArray( name , val );
+            putArray( name , val );
 
         else if (val instanceof Symbol) {
             putSymbol(name, (Symbol) val);
@@ -360,24 +359,24 @@ public class BasicBSONEncoder implements BSONEncoder {
     }
 
     protected void putNumber( String name , Number n ){
-		if ( n instanceof Integer ||
-	             n instanceof Short ||
-	             n instanceof Byte ||
-	             n instanceof AtomicInteger ){
-		    _put( NUMBER_INT , name );
-		    _buf.writeInt( n.intValue() );
-		}
-	    else if ( n instanceof Long || n instanceof AtomicLong ) {
-	        _put( NUMBER_LONG , name );
-	        _buf.writeLong( n.longValue() );
-	    }
-	    else if ( n instanceof Float || n instanceof Double ) {
-	      _put( NUMBER , name );
-	      _buf.writeDouble( n.doubleValue() );
-	    }
-		else {
-	        throw new IllegalArgumentException( "can't serialize " + n.getClass() );
-		}
+        if ( n instanceof Integer ||
+                 n instanceof Short ||
+                 n instanceof Byte ||
+                 n instanceof AtomicInteger ){
+            _put( NUMBER_INT , name );
+            _buf.writeInt( n.intValue() );
+        }
+        else if ( n instanceof Long || n instanceof AtomicLong ) {
+            _put( NUMBER_LONG , name );
+            _buf.writeLong( n.longValue() );
+        }
+        else if ( n instanceof Float || n instanceof Double ) {
+          _put( NUMBER , name );
+          _buf.writeDouble( n.doubleValue() );
+        }
+        else {
+            throw new IllegalArgumentException( "can't serialize " + n.getClass() );
+        }
     }
 
     protected void putBinary( String name , byte[] data ){
@@ -408,8 +407,8 @@ public class BasicBSONEncoder implements BSONEncoder {
     protected void putUUID(final String name, final UUID val) {
         _put(BINARY, name);
         _buf.writeInt(16);
-        _buf.write(_options.getUuidRepresentation().getBinaryType());
-        _buf.write(_options.getUuidRepresentation().getTranslator().toBytes(val));
+        _buf.write(_options.getUUIDRepresentation().getBinaryType());
+        _buf.write(_options.getUUIDRepresentation().getTranslator().toBytes(val));
     }
 
     protected void putSymbol( String name , Symbol s ){
