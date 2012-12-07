@@ -16,7 +16,6 @@
 package org.bson;
 
 import org.bson.io.PoolOutputBuffer;
-import org.bson.options.BSONOptions;
 import org.bson.types.ObjectId;
 
 import java.io.ByteArrayInputStream;
@@ -558,10 +557,6 @@ public class BasicBSONDecoder implements BSONDecoder {
     private static final int MAX_STRING = ( 32 * 1024 * 1024 );
 
     private static final String DEFAULT_ENCODING = "UTF-8";
-
-    private static final boolean _isAscii( final byte b ){
-        return b >=0 && b <= 127;
-    }
 
     static final String[] ONE_BYTE_STRINGS = new String[128];
     static void _fillRange( byte min, byte max ){

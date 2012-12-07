@@ -19,7 +19,6 @@ package org.bson;
 import com.mongodb.DBRefBase;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.OutputBuffer;
-import org.bson.options.BSONOptions;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;

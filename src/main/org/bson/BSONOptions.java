@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package org.bson.options;
+package org.bson;
 
-import org.bson.UUIDRepresentation;
 import org.bson.util.annotations.Immutable;
 
 /**
@@ -32,8 +31,8 @@ public final class BSONOptions {
     }
 
     /**
-     * Returns the UUIDRepresentation enum, this can be used by BSON encoders and decoders to determine how to
-     * serialise and deserialise the UUID.
+     * Returns the UUIDRepresentation enum, this can be used by BSON encoders and decoders to determine how to serialise
+     * and deserialise the UUID.
      *
      * @return the UUIDRepresentation
      */
@@ -42,8 +41,8 @@ public final class BSONOptions {
     }
 
     /**
-     * Builder class for DefaultBSONOptions that provides all the default options, and allows users to override
-     * the values they care about.
+     * Builder class for DefaultBSONOptions that provides all the default options, and allows users to override the
+     * values they care about.
      */
     public static class Builder {
         private UUIDRepresentation uuidRepresentation = UUIDRepresentation.JAVA_LEGACY;

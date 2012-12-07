@@ -16,6 +16,7 @@
 
 package org.bson.options;
 
+import org.bson.BSONOptions;
 import org.bson.UUIDRepresentation;
 import org.testng.annotations.Test;
 

@@ -16,7 +16,7 @@
 
 package com.mongodb;
 
-import org.bson.options.BSONOptions;
+import org.bson.BSONOptions;
 
 /**
  * Default implementation of DBEncoderFactory that creates a DefaultDBEncoder for encoding messages to the

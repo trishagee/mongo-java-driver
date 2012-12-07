@@ -16,7 +16,7 @@
 
 package com.mongodb;
 
-import org.bson.options.BSONOptions;
+import org.bson.BSONOptions;
 
 /**
  * Default implementation of the DBDecoderFactory that optionally takes BSONOptions to pass onto the Decoder.

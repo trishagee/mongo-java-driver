@@ -1,19 +1,17 @@
-// DBPort.java
-
-/**
- *      Copyright (C) 2008 10gen Inc.
+/*
+ * Copyright (c) 2008 - 2012 10gen, Inc. <http://10gen.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.mongodb;
@@ -32,14 +30,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * represents a Port to the database, which is effectively a single connection to a server
+ * Represents a Port to the database, which is effectively a single connection to a server.
  * Methods implemented at the port level should throw the raw exceptions like IOException,
- * so that the connector above can make appropriate decisions on how to handle.
+ * so that the connector above can make appropriate decisions on how to handle them.
  */
 public class DBPort {
     
     /**
-     * the default port
+     * The default port
      */
     public static final int PORT = 27017;
     static final boolean USE_NAGLE = false;

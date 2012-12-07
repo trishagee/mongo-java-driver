@@ -17,7 +17,6 @@
 package org.bson;
 
 import org.bson.io.BasicOutputBuffer;
-import org.bson.options.BSONOptions;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
