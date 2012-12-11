@@ -1,23 +1,25 @@
-/**
+/*
  * Copyright (c) 2008 - 2012 10gen, Inc. <http://10gen.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.mongodb;
 
 import com.mongodb.util.TestCase;
+import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONEncoder;
+import org.bson.UUIDRepresentation;
 import org.testng.annotations.Test;
 
 import javax.net.SocketFactory;
@@ -34,6 +36,7 @@ public class MongoClientURITest extends TestCase {
         }
 
     }
+
     @Test()
     public void testSingleServer() {
         MongoClientURI u = new MongoClientURI("mongodb://db.example.com");
@@ -41,7 +44,7 @@ public class MongoClientURITest extends TestCase {
         assertEquals("db.example.com", u.getHosts().get(0));
         assertNull(u.getDatabase());
         assertNull(u.getCollection());
-        assertNull( u.getUsername());
+        assertNull(u.getUsername());
         assertEquals(null, u.getPassword());
     }
 
@@ -88,6 +91,46 @@ public class MongoClientURITest extends TestCase {
         assertEquals("host:27011", u.getHosts().get(0));
         assertEquals("user", u.getUsername());
         assertEquals("pass", new String(u.getPassword()));
+    }
+
+    /**
+     * See http://docs.mongodb.org/manual/reference/connection-string/
+     */
+    @Test
+    public void testUUIDRepresentations() {
+        MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=standard");
+
+        // This is a bit of a roundabout way of testing, that relies on knowing the implementation,
+        // but it's the only way without doing a full integration test
+        BasicBSONDecoder bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        BasicBSONEncoder bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.STANDARD, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.STANDARD, bsonEncoder.getBSONOptions().getUUIDRepresentation());
+
+        uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=javalegacy");
+        bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonEncoder.getBSONOptions().getUUIDRepresentation());
+
+        //case shouldn't matter
+        uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=javaLegacy");
+        bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonEncoder.getBSONOptions().getUUIDRepresentation());
+
+        uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=cSharpLegacy");
+        bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.C_SHARP_LEGACY, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.C_SHARP_LEGACY, bsonEncoder.getBSONOptions().getUUIDRepresentation());
+
+        uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=pythonLegacy");
+        bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.PYTHON_LEGACY, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.PYTHON_LEGACY, bsonEncoder.getBSONOptions().getUUIDRepresentation());
     }
 
     @Test()

@@ -517,7 +517,10 @@ public class BasicBSONEncoder implements BSONEncoder {
         _put( s );
     }
 
+    public BSONOptions getBSONOptions() {
+        return _options;
+    }
+
     private final BSONOptions _options;
     protected OutputBuffer _buf;
-
 }

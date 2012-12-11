@@ -1,26 +1,30 @@
-/**
+/*
  * Copyright (c) 2008 - 2012 10gen, Inc. <http://10gen.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.mongodb;
 
+import org.bson.BSONOptions;
+import org.bson.UUIDRepresentation;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -263,6 +267,11 @@ public class MongoClientURI {
                     fsync = _parseBoolean(value);
                 } else if (key.equals("j")) {
                     journal = _parseBoolean(value);
+                } else if (key.equals("uuidrepresentation")) {
+                    final UUIDRepresentation uuidRepresentation = parseUUIDRepresentation(value);
+                    final BSONOptions bsonOptions = new BSONOptions.Builder().uuidRepresentation(uuidRepresentation).build();
+                    builder.dbEncoderFactory(new DefaultDBEncoderFactory(bsonOptions));
+                    builder.dbDecoderFactory(new DefaultDBDecoderFactory(bsonOptions));
                 } else {
                     LOGGER.warning("Unknown or Unsupported Option '" + key + "'");
                 }
@@ -399,6 +408,14 @@ public class MongoClientURI {
         return _options;
     }
 
+    private static UUIDRepresentation parseUUIDRepresentation(final String uriValue) {
+        UUIDRepresentation retVal = UUID_REPRESENTATION_MAP.get(uriValue.toLowerCase());
+        if (retVal == null) {
+            throw new IllegalArgumentException("Unsupported value for 'guids' of '" + uriValue + "'");
+        }
+        return retVal;
+    }
+
     // ---------------------------------
 
     final String userName;
@@ -411,7 +428,16 @@ public class MongoClientURI {
 
     private MongoClientOptions _options;
 
-    static final Logger LOGGER = Logger.getLogger("com.mongodb.MongoURI");
+    static final Logger LOGGER = Logger.getLogger("com.mongodb.MongoClientURI");
+
+    private static final Map<String, UUIDRepresentation> UUID_REPRESENTATION_MAP = new HashMap<String, UUIDRepresentation>();
+
+    static {
+        UUID_REPRESENTATION_MAP.put("standard", UUIDRepresentation.STANDARD);
+        UUID_REPRESENTATION_MAP.put("javalegacy", UUIDRepresentation.JAVA_LEGACY);
+        UUID_REPRESENTATION_MAP.put("pythonlegacy", UUIDRepresentation.PYTHON_LEGACY);
+        UUID_REPRESENTATION_MAP.put("csharplegacy", UUIDRepresentation.C_SHARP_LEGACY);
+    }
 
     @Override
     public String toString() {
