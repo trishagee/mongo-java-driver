@@ -121,6 +121,23 @@ import java.util.logging.Logger;
  * </ul>
  * </li>
  * </ul>
+ * <p>UUID Representation:</p>
+ * <ul>
+ * <li>{@code uuidRepresentation=enum}: The encoding used for UUIDs.  Allows you to use the Java driver with databases
+ * that have UUIDs persisted with a different driver or different policy.
+ * <ul>
+ * <li>Enumerated values:
+ * <ul>
+ * <li>{@code standard} The new standard representation (binary subtype 4 with bytes in network byte order).</li>
+ * <li>{@code csharpLegacy} The default representation for the C# driver</li>
+ * <li>{@code javaLegacy} The default representation for the Java driver</li>
+ * <li>{@code pythonLegacy} The default representation for the Python driver</li>
+ * </ul>
+ * </li>
+ * <li>Default is driver specific, to preserve backwards compatibility. New implementations should default to standard</li>
+ * </ul>
+ * </li>
+ * </ul>
  *
  * Note: This class is a replacement for {@code MongoURI}, to be used with {@code MongoClient}.  The main difference
  * in behavior is that the default write concern is {@code WriteConcern.ACKNOWLEDGED}.

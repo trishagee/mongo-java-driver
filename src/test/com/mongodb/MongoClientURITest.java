@@ -98,12 +98,18 @@ public class MongoClientURITest extends TestCase {
      */
     @Test
     public void testUUIDRepresentations() {
-        MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=standard");
+        MongoClientURI uri = new MongoClientURI("mongodb://localhost/");
 
         // This is a bit of a roundabout way of testing, that relies on knowing the implementation,
         // but it's the only way without doing a full integration test
         BasicBSONDecoder bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
         BasicBSONEncoder bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonDecoder.getBSONOptions().getUUIDRepresentation());
+        assertEquals(UUIDRepresentation.JAVA_LEGACY, bsonEncoder.getBSONOptions().getUUIDRepresentation());
+
+        uri = new MongoClientURI("mongodb://localhost/?uuidRepresentation=standard");
+        bsonDecoder = (BasicBSONDecoder) uri.getOptions().getDbDecoderFactory().create();
+        bsonEncoder = (BasicBSONEncoder) uri.getOptions().getDbEncoderFactory().create();
         assertEquals(UUIDRepresentation.STANDARD, bsonDecoder.getBSONOptions().getUUIDRepresentation());
         assertEquals(UUIDRepresentation.STANDARD, bsonEncoder.getBSONOptions().getUUIDRepresentation());
 

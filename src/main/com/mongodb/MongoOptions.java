@@ -1,19 +1,17 @@
-// MongoOptions.java
-
-/**
- *      Copyright (C) 2008 10gen Inc.
+/*
+ * Copyright (c) 2008 - 2012 10gen, Inc. <http://10gen.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package com.mongodb;
@@ -510,7 +508,6 @@ public class MongoOptions {
     }
 
     /**
-     *
      * @return the DBCallback decoding factory
      */
     public synchronized DBDecoderFactory getDbDecoderFactory() {
@@ -518,15 +515,18 @@ public class MongoOptions {
     }
 
     /**
+     * Allows you to specify custom decoding functionality.  Note that if you use this option, you will be overriding
+     * any UUIDRepresentation selected in the Mongo URI.  If you require a specific UUIDRepresentation, you will have to
+     * provide the decoding functionality for your selected UUID type in the DBDecoder created by this
+     * DBDecoderFactory.
      *
-     * @param factory sets the DBCallback decoding factory
+     * @param factory the custom DBDecoderFactory to use
      */
-    public synchronized void setDbDecoderFactory(DBDecoderFactory factory) {
+    public synchronized void setDbDecoderFactory(final DBDecoderFactory factory) {
         dbDecoderFactory = factory;
     }
 
     /**
-     *
      * @return the encoding factory
      */
     public synchronized DBEncoderFactory getDbEncoderFactory() {
@@ -534,10 +534,14 @@ public class MongoOptions {
     }
 
     /**
+     * Allows you to specify custom encoding functionality.  Note that if you use this option, you will be overriding
+     * any UUIDRepresentation selected in the Mongo URI.  If you require a specific UUIDRepresentation, you will have to
+     * provide the encoding functionality for your required UUID type in the DBEncoder created by this
+     * DBEncoderFactory.
      *
-     * @param factory sets the encoding factory
+     * @param factory the custom DBEncoderFactory to use
      */
-    public synchronized void setDbEncoderFactory(DBEncoderFactory factory) {
+    public synchronized void setDbEncoderFactory(final DBEncoderFactory factory) {
         dbEncoderFactory = factory;
     }
 
