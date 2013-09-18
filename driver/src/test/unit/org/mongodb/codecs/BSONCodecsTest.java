@@ -45,188 +45,188 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 
-public class PrimitiveCodecsTest {
-    private final PrimitiveCodecs primitiveCodecs = PrimitiveCodecs.createDefault();
+public class BSONCodecsTest {
+    private final BSONCodecs bsonCodecs = BSONCodecs.createDefault();
 
     @Test
     public void shouldBeAbleToEncodeString() {
-        assertThat(primitiveCodecs.canEncode(String.class), is(true));
+        assertThat(bsonCodecs.canEncode(String.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeObjectId() {
-        assertThat(primitiveCodecs.canEncode(ObjectId.class), is(true));
+        assertThat(bsonCodecs.canEncode(ObjectId.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeInteger() {
-        assertThat(primitiveCodecs.canEncode(Integer.class), is(true));
+        assertThat(bsonCodecs.canEncode(Integer.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeLong() {
-        assertThat(primitiveCodecs.canEncode(Long.class), is(true));
+        assertThat(bsonCodecs.canEncode(Long.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeDouble() {
-        assertThat(primitiveCodecs.canEncode(Double.class), is(true));
+        assertThat(bsonCodecs.canEncode(Double.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeBinary() {
-        assertThat(primitiveCodecs.canEncode(Binary.class), is(true));
+        assertThat(bsonCodecs.canEncode(Binary.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeDate() {
-        assertThat(primitiveCodecs.canEncode(Date.class), is(true));
+        assertThat(bsonCodecs.canEncode(Date.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeTimestamp() {
-        assertThat(primitiveCodecs.canEncode(BSONTimestamp.class), is(true));
+        assertThat(bsonCodecs.canEncode(BSONTimestamp.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeBoolean() {
-        assertThat(primitiveCodecs.canEncode(Boolean.class), is(true));
+        assertThat(bsonCodecs.canEncode(Boolean.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodePattern() {
-        assertThat(primitiveCodecs.canEncode(Pattern.class), is(true));
+        assertThat(bsonCodecs.canEncode(Pattern.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeMinKey() {
-        assertThat(primitiveCodecs.canEncode(MinKey.class), is(true));
+        assertThat(bsonCodecs.canEncode(MinKey.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeMaxKey() {
-        assertThat(primitiveCodecs.canEncode(MaxKey.class), is(true));
+        assertThat(bsonCodecs.canEncode(MaxKey.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeCode() {
-        assertThat(primitiveCodecs.canEncode(Code.class), is(true));
+        assertThat(bsonCodecs.canEncode(Code.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeNull() {
-        assertThat(primitiveCodecs.canEncode(null), is(true));
+        assertThat(bsonCodecs.canEncode(null), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeFloat() {
-        assertThat(primitiveCodecs.canEncode(Float.class), is(true));
+        assertThat(bsonCodecs.canEncode(Float.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeShort() {
-        assertThat(primitiveCodecs.canEncode(Short.class), is(true));
+        assertThat(bsonCodecs.canEncode(Short.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeByte() {
-        assertThat(primitiveCodecs.canEncode(Byte.class), is(true));
+        assertThat(bsonCodecs.canEncode(Byte.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToEncodeByteArray() {
-        assertThat(primitiveCodecs.canEncode(byte[].class), is(true));
+        assertThat(bsonCodecs.canEncode(byte[].class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeString() {
-        assertThat(primitiveCodecs.canDecode(String.class), is(true));
+        assertThat(bsonCodecs.canDecode(String.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeObjectId() {
-        assertThat(primitiveCodecs.canDecode(ObjectId.class), is(true));
+        assertThat(bsonCodecs.canDecode(ObjectId.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeInteger() {
-        assertThat(primitiveCodecs.canDecode(Integer.class), is(true));
+        assertThat(bsonCodecs.canDecode(Integer.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeLong() {
-        assertThat(primitiveCodecs.canDecode(Long.class), is(true));
+        assertThat(bsonCodecs.canDecode(Long.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeDouble() {
-        assertThat(primitiveCodecs.canDecode(Double.class), is(true));
+        assertThat(bsonCodecs.canDecode(Double.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeDate() {
-        assertThat(primitiveCodecs.canDecode(Date.class), is(true));
+        assertThat(bsonCodecs.canDecode(Date.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeTimestamp() {
-        assertThat(primitiveCodecs.canDecode(BSONTimestamp.class), is(true));
+        assertThat(bsonCodecs.canDecode(BSONTimestamp.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeBoolean() {
-        assertThat(primitiveCodecs.canDecode(Boolean.class), is(true));
+        assertThat(bsonCodecs.canDecode(Boolean.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodePattern() {
-        assertThat(primitiveCodecs.canDecode(Pattern.class), is(true));
+        assertThat(bsonCodecs.canDecode(Pattern.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeMinKey() {
-        assertThat(primitiveCodecs.canDecode(MinKey.class), is(true));
+        assertThat(bsonCodecs.canDecode(MinKey.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeMaxKey() {
-        assertThat(primitiveCodecs.canDecode(MaxKey.class), is(true));
+        assertThat(bsonCodecs.canDecode(MaxKey.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeCode() {
-        assertThat(primitiveCodecs.canDecode(Code.class), is(true));
+        assertThat(bsonCodecs.canDecode(Code.class), is(true));
     }
 
     @Test
     public void shouldBeAbleToDecodeNull() {
-        assertThat(primitiveCodecs.canDecode(null), is(true));
+        assertThat(bsonCodecs.canDecode(null), is(true));
     }
 
     //these are classes that have encoders but not decoders, not symmetrical
     @Test
     public void shouldNotBeAbleToDecodeByteArray() {
-        assertThat(primitiveCodecs.canDecode(byte[].class), is(false));
+        assertThat(bsonCodecs.canDecode(byte[].class), is(false));
     }
 
     @Test
     public void shouldNotBeAbleToDecodeShort() {
-        assertThat(primitiveCodecs.canDecode(Short.class), is(false));
+        assertThat(bsonCodecs.canDecode(Short.class), is(false));
     }
 
     @Test
     public void shouldNotBeAbleToDecodeBinary() {
-        assertThat(primitiveCodecs.canDecode(Binary.class), is(false));
+        assertThat(bsonCodecs.canDecode(Binary.class), is(false));
     }
 
     @Test
     public void shouldNotBeAbleToDecodeFloat() {
-        assertThat(primitiveCodecs.canDecode(Float.class), is(false));
+        assertThat(bsonCodecs.canDecode(Float.class), is(false));
     }
 
     @Test
     public void shouldNotBeAbleToDecodeByte() {
-        assertThat(primitiveCodecs.canDecode(Byte.class), is(false));
+        assertThat(bsonCodecs.canDecode(Byte.class), is(false));
     }
 
     @Test
@@ -242,7 +242,7 @@ public class PrimitiveCodecsTest {
         reader.readStartDocument();
         reader.readName();
 
-        final Object object = primitiveCodecs.decode(reader);
+        final Object object = bsonCodecs.decode(reader);
 
         assertThat(object, instanceOf(DBRef.class));
         final DBRef reference = (DBRef) object;
@@ -254,7 +254,7 @@ public class PrimitiveCodecsTest {
     @Test
     public void testOtherDecoderMethod() {
         @SuppressWarnings("rawtypes")
-        PrimitiveCodecs codecs = PrimitiveCodecs.builder(primitiveCodecs).otherDecoder(BSONType.BINARY, new Decoder() {
+        BSONCodecs codecs = BSONCodecs.builder(bsonCodecs).otherDecoder(BSONType.BINARY, new Decoder() {
             @Override
             public Object decode(final BSONReader reader) {
                 return reader.readBinaryData().getData();

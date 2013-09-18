@@ -19,8 +19,8 @@ package org.mongodb.command;
 import org.bson.BSONReader;
 import org.bson.BSONType;
 import org.mongodb.Decoder;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
-import org.mongodb.codecs.PrimitiveCodecs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,8 @@ public class MapReduceCommandResultCodec<T> extends DocumentCodec {
 
     private final Decoder<T> decoder;
 
-    public MapReduceCommandResultCodec(final PrimitiveCodecs primitiveCodecs, final Decoder<T> decoder) {
-        super(primitiveCodecs);
+    public MapReduceCommandResultCodec(final BSONCodecs bsonCodecs, final Decoder<T> decoder) {
+        super(bsonCodecs);
         this.decoder = decoder;
     }
 

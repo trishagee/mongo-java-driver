@@ -29,7 +29,7 @@ public class EncoderRegistry {
     private final Codecs codecs;
 
     //TODO: this needs to be injected
-    private final PrimitiveCodecs primitiveCodecs = PrimitiveCodecs.createDefault();
+    private final BSONCodecs bsonCodecs = BSONCodecs.createDefault();
     //TODO: this needs to be injected
     private final QueryFieldNameValidator defaultValidator = new QueryFieldNameValidator();
 
@@ -37,7 +37,7 @@ public class EncoderRegistry {
     private final Map<Class, Encoder> classToEncoderMap = new HashMap<Class, Encoder>();
 
     public EncoderRegistry() {
-        codecs = new Codecs(primitiveCodecs, defaultValidator, this);
+        codecs = new Codecs(bsonCodecs, defaultValidator, this);
         classToEncoderMap.put(CodeWithScope.class, new CodeWithScopeCodec(codecs));
         classToEncoderMap.put(Iterable.class, new IterableCodec(codecs));
         classToEncoderMap.put(DBRef.class, new DBRefEncoder(codecs));
@@ -45,7 +45,7 @@ public class EncoderRegistry {
 
     @SuppressWarnings("rawtypes")
     public Encoder getDefaultEncoder() {
-        return (Encoder) new DocumentCodec(primitiveCodecs, defaultValidator, this);
+        return (Encoder) new DocumentCodec(bsonCodecs, defaultValidator, this);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"}) //not cool

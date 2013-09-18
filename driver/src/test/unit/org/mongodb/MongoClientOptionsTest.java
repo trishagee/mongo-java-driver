@@ -17,7 +17,7 @@
 package org.mongodb;
 
 import org.junit.Test;
-import org.mongodb.codecs.PrimitiveCodecs;
+import org.mongodb.codecs.BSONCodecs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -171,8 +171,8 @@ public class MongoClientOptionsTest {
         builder.heartbeatConnectTimeout(15);
         builder.heartbeatSocketTimeout(20);
         builder.requiredReplicaSetName("test");
-        final PrimitiveCodecs primitiveCodecs = PrimitiveCodecs.createDefault();
-        builder.primitiveCodecs(primitiveCodecs);
+        final BSONCodecs bsonCodecs = BSONCodecs.createDefault();
+        builder.primitiveCodecs(bsonCodecs);
 
         final MongoClientOptions options = builder.build();
 
@@ -191,7 +191,7 @@ public class MongoClientOptionsTest {
         assertEquals(true, options.isSocketKeepAlive());
         assertTrue(options.isSSLEnabled());
         assertFalse(options.isAsyncEnabled());
-        assertSame(primitiveCodecs, options.getPrimitiveCodecs());
+        assertSame(bsonCodecs, options.getBsonCodecs());
         assertEquals(5, options.getHeartbeatFrequency());
         assertEquals(10, options.getHeartbeatConnectRetryFrequency());
         assertEquals(15, options.getHeartbeatConnectTimeout());

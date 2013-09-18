@@ -30,9 +30,9 @@ public class CollectibleDocumentCodec extends DocumentCodec implements Collectib
     public static final String ID_FIELD_NAME = "_id";
     private final IdGenerator idGenerator;
 
-    public CollectibleDocumentCodec(final PrimitiveCodecs primitiveCodecs,
+    public CollectibleDocumentCodec(final BSONCodecs bsonCodecs,
                                     final IdGenerator idGenerator) {
-        super(primitiveCodecs, new FieldNameValidator());
+        super(bsonCodecs, new FieldNameValidator());
         if (idGenerator == null) {
             throw new IllegalArgumentException("idGenerator is null");
         }

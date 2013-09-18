@@ -29,7 +29,7 @@ public class IntegerArrayCodecPerformanceTest {
 
     private StubBSONWriter bsonWriter;
     private IntegerCodec integerCodec = new IntegerCodec();
-    private PrimitiveCodecs primitiveCodecs = PrimitiveCodecs.createDefault();
+    private BSONCodecs bsonCodecs = BSONCodecs.createDefault();
 
     @Before
     public void setUp() throws Exception {
@@ -95,7 +95,7 @@ public class IntegerArrayCodecPerformanceTest {
         //28,653,139 ops per second when you have the lookup via PrimitiveCodecs
         for (int i = numberOfIterations; i != 0; i--) {
             for (int intValue : intArrayToEncode) {
-                primitiveCodecs.encode(bsonWriter, intValue);
+                bsonCodecs.encode(bsonWriter, intValue);
             }
         }
     }

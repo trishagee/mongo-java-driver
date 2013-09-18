@@ -31,7 +31,7 @@ class PojoCodecEncodingSpecification extends Specification {
     private final BSONWriter bsonWriter = Mock();
 
     private final EncoderRegistry encoderRegistry = new EncoderRegistry()
-    private final Codecs codecs = new Codecs(PrimitiveCodecs.createDefault(), encoderRegistry)
+    private final Codecs codecs = new Codecs(BSONCodecs.createDefault(), encoderRegistry)
 
     @Subject
     private final PojoCodec<Object> pojoCodec = new PojoCodec<Object>(codecs, null)

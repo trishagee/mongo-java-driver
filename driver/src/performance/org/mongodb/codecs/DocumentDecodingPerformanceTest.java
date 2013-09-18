@@ -44,7 +44,7 @@ public class DocumentDecodingPerformanceTest {
 
     @Before
     public void setUp() throws Exception {
-        documentCodec = new DocumentCodec(PrimitiveCodecs.createDefault());
+        documentCodec = new DocumentCodec(BSONCodecs.createDefault());
     }
 
     @Test

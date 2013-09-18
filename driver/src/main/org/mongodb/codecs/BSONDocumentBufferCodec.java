@@ -39,12 +39,12 @@ import java.io.IOException;
  */
 public class BSONDocumentBufferCodec implements CollectibleCodec<BSONDocumentBuffer> {
     private final BufferProvider bufferProvider;
-    private final PrimitiveCodecs primitiveCodecs;
+    private final BSONCodecs bsonCodecs;
 
     public BSONDocumentBufferCodec(final BufferProvider bufferProvider,
-                                   final PrimitiveCodecs primitiveCodecs) {
+                                   final BSONCodecs bsonCodecs) {
         this.bufferProvider = bufferProvider;
-        this.primitiveCodecs = primitiveCodecs;
+        this.bsonCodecs = bsonCodecs;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class BSONDocumentBufferCodec implements CollectibleCodec<BSONDocumentBuf
             while (reader.readBSONType() != BSONType.END_OF_DOCUMENT) {
                 String name = reader.readName();
                 if (name.equals("_id")) {
-                    return primitiveCodecs.decode(reader);
+                    return bsonCodecs.decode(reader);
                 }
                 else {
                     reader.skipValue();

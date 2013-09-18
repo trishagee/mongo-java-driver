@@ -24,9 +24,9 @@ import org.mongodb.MongoFuture;
 import org.mongodb.MongoNamespace;
 import org.mongodb.WriteConcern;
 import org.mongodb.WriteResult;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
 import org.mongodb.codecs.EncoderRegistry;
-import org.mongodb.codecs.PrimitiveCodecs;
 import org.mongodb.codecs.validators.QueryFieldNameValidator;
 import org.mongodb.connection.BufferProvider;
 import org.mongodb.connection.Connection;
@@ -168,7 +168,7 @@ public abstract class WriteCommandProtocol implements Protocol<WriteResult> {
 
     protected static class CommandCodec<T> extends DocumentCodec {
         public CommandCodec(final Encoder<T> encoder) {
-            super(PrimitiveCodecs.createDefault(), new QueryFieldNameValidator(), createEncoderRegistry(encoder));
+            super(BSONCodecs.createDefault(), new QueryFieldNameValidator(), createEncoderRegistry(encoder));
         }
 
         private static <T> EncoderRegistry createEncoderRegistry(final Encoder<T> encoder) {

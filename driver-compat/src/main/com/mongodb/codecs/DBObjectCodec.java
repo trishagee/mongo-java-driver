@@ -33,7 +33,7 @@ import org.bson.types.DBPointer;
 import org.bson.types.Symbol;
 import org.mongodb.Codec;
 import org.mongodb.MongoException;
-import org.mongodb.codecs.PrimitiveCodecs;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.validators.QueryFieldNameValidator;
 import org.mongodb.codecs.validators.Validator;
 
@@ -47,25 +47,25 @@ import static com.mongodb.MongoExceptions.mapException;
 @SuppressWarnings("rawtypes")
 public class DBObjectCodec implements Codec<DBObject> {
 
-    private final PrimitiveCodecs primitiveCodecs;
+    private final BSONCodecs bsonCodecs;
     private final Validator<String> fieldNameValidator;
     private final DB db;
     private final DBObjectFactory objectFactory;
 
 
-    public DBObjectCodec(final DB db, final PrimitiveCodecs primitiveCodecs,
+    public DBObjectCodec(final DB db, final BSONCodecs bsonCodecs,
                          final Validator<String> fieldNameValidator, final DBObjectFactory objectFactory) {
-        if (primitiveCodecs == null) {
+        if (bsonCodecs == null) {
             throw new IllegalArgumentException("primitiveCodecs is null");
         }
-        this.primitiveCodecs = primitiveCodecs;
+        this.bsonCodecs = bsonCodecs;
         this.db = db;
         this.fieldNameValidator = fieldNameValidator;
         this.objectFactory = objectFactory;
     }
 
     public DBObjectCodec() {
-        this(null, PrimitiveCodecs.createDefault(), new QueryFieldNameValidator(), new DBObjectFactory());
+        this(null, BSONCodecs.createDefault(), new QueryFieldNameValidator(), new DBObjectFactory());
     }
 
     //TODO: what about BSON Exceptions?
@@ -114,13 +114,13 @@ public class DBObjectCodec implements Codec<DBObject> {
             } else if (value instanceof CodeWScope) {
                 encodeCodeWScope(bsonWriter, (CodeWScope) value);
             } else if (value instanceof byte[]) {
-                primitiveCodecs.encode(bsonWriter, new Binary((byte[]) value));
+                bsonCodecs.encode(bsonWriter, new Binary((byte[]) value));
             } else if (value != null && value.getClass().isArray()) {
                 encodeArray(bsonWriter, value);
             } else if (value instanceof Symbol) {
                 bsonWriter.writeSymbol(((Symbol) value).getSymbol());
             } else {
-                primitiveCodecs.encode(bsonWriter, value);
+                bsonCodecs.encode(bsonWriter, value);
             }
         } catch (final MongoException e) {
             throw mapException(e);
@@ -209,7 +209,7 @@ public class DBObjectCodec implements Codec<DBObject> {
                     initialRetVal = new DBRef(db, dbPointer.getNamespace(), dbPointer.getId());
                     break;
                 default:
-                    initialRetVal = primitiveCodecs.decode(reader);
+                    initialRetVal = bsonCodecs.decode(reader);
             }
 
             if (bsonType.isContainer() && fieldName != null) {

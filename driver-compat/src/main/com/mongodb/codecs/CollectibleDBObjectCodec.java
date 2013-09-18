@@ -22,7 +22,7 @@ import com.mongodb.DBObjectFactory;
 import org.bson.BSONWriter;
 import org.mongodb.CollectibleCodec;
 import org.mongodb.IdGenerator;
-import org.mongodb.codecs.PrimitiveCodecs;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.validators.FieldNameValidator;
 
 /**
@@ -33,10 +33,10 @@ public class CollectibleDBObjectCodec extends DBObjectCodec implements Collectib
     private static final String ID_FIELD_NAME = "_id";
     private final IdGenerator idGenerator;
 
-    public CollectibleDBObjectCodec(final DB database, final PrimitiveCodecs primitiveCodecs,
+    public CollectibleDBObjectCodec(final DB database, final BSONCodecs bsonCodecs,
                                     final IdGenerator idGenerator,
                                     final DBObjectFactory objectFactory) {
-        super(database, primitiveCodecs, new FieldNameValidator(), objectFactory);
+        super(database, bsonCodecs, new FieldNameValidator(), objectFactory);
         this.idGenerator = idGenerator;
     }
 

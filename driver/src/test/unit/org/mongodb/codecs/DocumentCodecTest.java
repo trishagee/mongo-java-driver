@@ -58,7 +58,7 @@ public class DocumentCodecTest {
     public void setUp() throws Exception {
         buffer = new BasicOutputBuffer();
         writer = new BSONBinaryWriter(buffer, true);
-        documentCodec = new DocumentCodec(PrimitiveCodecs.createDefault());
+        documentCodec = new DocumentCodec(BSONCodecs.createDefault());
     }
 
     @After

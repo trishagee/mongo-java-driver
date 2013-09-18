@@ -31,7 +31,7 @@ class CodecsSpecification extends Specification {
     private final BSONWriter bsonWriter = Mock();
 
     @Subject
-    private final Codecs codecs = Codecs.builder().primitiveCodecs(PrimitiveCodecs.createDefault()).build();
+    private final Codecs codecs = Codecs.builder().primitiveCodecs(BSONCodecs.createDefault()).build();
 
     def 'should encode code with scope as java script followed by document of scope when passed in as object'() {
         given:

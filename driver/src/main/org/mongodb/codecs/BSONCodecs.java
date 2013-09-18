@@ -38,16 +38,14 @@ import java.util.Set;
 // Suspect that the rawtypes warnings are telling us something that we haven't done cleanly
 // we should address these
 @SuppressWarnings("rawtypes")
-//CHECKSTYLE:OFF
-public class PrimitiveCodecs implements Codec<Object> {
-    //CHECKSTYLE:ON
+public class BSONCodecs implements Codec<Object> {
     private Map<Class, Encoder<?>> classEncoderMap = new HashMap<Class, Encoder<?>>();
     private Map<BSONType, Decoder<?>> bsonTypeDecoderMap = new EnumMap<BSONType, Decoder<?>>(BSONType.class);
     private Set<Class> supportedDecodeTypes = new HashSet<Class>();
 
-    PrimitiveCodecs(final Map<Class, Encoder<?>> classEncoderMap,
-                    final Map<BSONType, Decoder<?>> bsonTypeDecoderMap,
-                    final Set<Class> supportedDecodeTypes) {
+    BSONCodecs(final Map<Class, Encoder<?>> classEncoderMap,
+               final Map<BSONType, Decoder<?>> bsonTypeDecoderMap,
+               final Set<Class> supportedDecodeTypes) {
         this.classEncoderMap = classEncoderMap;
         this.bsonTypeDecoderMap = bsonTypeDecoderMap;
         this.supportedDecodeTypes = supportedDecodeTypes;
@@ -87,12 +85,12 @@ public class PrimitiveCodecs implements Codec<Object> {
         return new Builder();
     }
 
-    public static Builder builder(final PrimitiveCodecs base) {
+    public static Builder builder(final BSONCodecs base) {
         return new Builder(base);
     }
 
     // TODO: find a proper way to do this...
-    public static PrimitiveCodecs createDefault() {
+    public static BSONCodecs createDefault() {
         return builder()
                .objectIdCodec(new ObjectIdCodec())
                .integerCodec(new IntegerCodec())
@@ -138,7 +136,7 @@ public class PrimitiveCodecs implements Codec<Object> {
         public Builder() {
         }
 
-        public Builder(final PrimitiveCodecs base) {
+        public Builder(final BSONCodecs base) {
             classEncoderMap.putAll(base.classEncoderMap);
             bsonTypeDecoderMap.putAll(base.bsonTypeDecoderMap);
             supportedDecodeTypes.addAll(base.supportedDecodeTypes);
@@ -238,8 +236,8 @@ public class PrimitiveCodecs implements Codec<Object> {
             return this;
         }
 
-        public PrimitiveCodecs build() {
-            return new PrimitiveCodecs(classEncoderMap, bsonTypeDecoderMap, supportedDecodeTypes);
+        public BSONCodecs build() {
+            return new BSONCodecs(classEncoderMap, bsonTypeDecoderMap, supportedDecodeTypes);
         }
 
         private void registerCodec(final BSONType bsonType, final Codec<?> codec) {

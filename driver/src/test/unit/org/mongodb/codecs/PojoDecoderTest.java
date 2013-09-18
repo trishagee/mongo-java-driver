@@ -51,7 +51,7 @@ import static org.mongodb.codecs.CodecTestUtil.prepareReaderWithObjectToBeDecode
 public class PojoDecoderTest {
 
     private final EncoderRegistry encoderRegistry = new EncoderRegistry();
-    private final Codecs codecs = new Codecs(PrimitiveCodecs.createDefault(), encoderRegistry);
+    private final Codecs codecs = new Codecs(BSONCodecs.createDefault(), encoderRegistry);
     private PojoDecoder pojoDecoder;
 
     @Before

@@ -20,8 +20,8 @@ import org.mongodb.CommandResult;
 import org.mongodb.Decoder;
 import org.mongodb.Document;
 import org.mongodb.MongoNamespace;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
-import org.mongodb.codecs.PrimitiveCodecs;
 import org.mongodb.connection.BufferProvider;
 import org.mongodb.protocol.CommandProtocol;
 import org.mongodb.session.PrimaryServerSelector;
@@ -35,7 +35,7 @@ public class FindAndRemoveOperation<T> extends BaseOperation<T> {
     private final MongoNamespace namespace;
     private final FindAndRemove<T> findAndRemove;
     private final CommandResultWithPayloadDecoder<T> resultDecoder;
-    private final DocumentCodec commandEncoder = new DocumentCodec(PrimitiveCodecs.createDefault());
+    private final DocumentCodec commandEncoder = new DocumentCodec(BSONCodecs.createDefault());
 
     public FindAndRemoveOperation(final MongoNamespace namespace, final FindAndRemove<T> findAndRemove, final Decoder<T> resultDecoder,
                                   final BufferProvider bufferProvider, final Session session, final boolean closeSession) {

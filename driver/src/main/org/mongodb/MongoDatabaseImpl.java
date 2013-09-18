@@ -50,7 +50,7 @@ class MongoDatabaseImpl implements MongoDatabase {
         return getCollection(collectionName,
                             new CollectibleDocumentCodec(operationOptions
                                                               .withDefaults(options)
-                                                              .getPrimitiveCodecs(),
+                                                              .getBsonCodecs(),
                                                              new ObjectIdGenerator()),
                             operationOptions);
     }

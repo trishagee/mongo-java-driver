@@ -17,7 +17,7 @@
 package org.mongodb;
 
 import org.mongodb.annotations.Immutable;
-import org.mongodb.codecs.PrimitiveCodecs;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.connection.ConnectionPoolSettings;
 import org.mongodb.connection.SSLSettings;
 import org.mongodb.connection.ServerSettings;
@@ -38,7 +38,7 @@ public final class MongoClientOptions {
     private final String description;
     private final ReadPreference readPreference;
     private final WriteConcern writeConcern;
-    private final PrimitiveCodecs primitiveCodecs;
+    private final BSONCodecs bsonCodecs;
 
     private final int minConnectionPoolSize;
     private final int maxConnectionPoolSize;
@@ -87,7 +87,7 @@ public final class MongoClientOptions {
         private String description;
         private ReadPreference readPreference = ReadPreference.primary();
         private WriteConcern writeConcern = WriteConcern.ACKNOWLEDGED;
-        private PrimitiveCodecs primitiveCodecs = PrimitiveCodecs.createDefault();
+        private BSONCodecs bsonCodecs = BSONCodecs.createDefault();
 
         private int minConnectionPoolSize;
         private int maxConnectionPoolSize = 100;
@@ -327,13 +327,13 @@ public final class MongoClientOptions {
          * Sets the PrimitiveCodecs to use.
          *
          * @return {@code this}
-         * @see org.mongodb.MongoClientOptions#getPrimitiveCodecs()
+         * @see org.mongodb.MongoClientOptions#getBsonCodecs()
          */
-        public Builder primitiveCodecs(final PrimitiveCodecs aPrimitiveCodecs) {
-            if (aPrimitiveCodecs == null) {
+        public Builder primitiveCodecs(final BSONCodecs aBSONCodecs) {
+            if (aBSONCodecs == null) {
                 throw new IllegalArgumentException("null is not a legal value");
             }
-            this.primitiveCodecs = aPrimitiveCodecs;
+            this.bsonCodecs = aBSONCodecs;
             return this;
         }
 
@@ -637,8 +637,8 @@ public final class MongoClientOptions {
      *
      * @return primitive codecs
      */
-    public PrimitiveCodecs getPrimitiveCodecs() {
-        return primitiveCodecs;
+    public BSONCodecs getBsonCodecs() {
+        return bsonCodecs;
     }
 
     /**
@@ -794,7 +794,7 @@ public final class MongoClientOptions {
                + ", maxAutoConnectRetryTime=" + maxAutoConnectRetryTime
                + ", readPreference=" + readPreference
                + ", writeConcern=" + writeConcern
-               + ", primitiveCodecs=" + primitiveCodecs
+               + ", primitiveCodecs=" + bsonCodecs
                + ", SSLEnabled=" + SSLEnabled
                + ", asyncEnabled=" + asyncEnabled
                + ", alwaysUseMBeans=" + alwaysUseMBeans
@@ -821,7 +821,7 @@ public final class MongoClientOptions {
         maxAutoConnectRetryTime = builder.maxAutoConnectRetryTime;
         readPreference = builder.readPreference;
         writeConcern = builder.writeConcern;
-        primitiveCodecs = builder.primitiveCodecs;
+        bsonCodecs = builder.bsonCodecs;
         SSLEnabled = builder.SSLEnabled;
         asyncEnabled = builder.asyncEnabled;
         alwaysUseMBeans = builder.alwaysUseMBeans;

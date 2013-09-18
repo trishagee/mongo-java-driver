@@ -31,7 +31,7 @@ import java.util.Map;
 import static java.lang.String.format;
 
 public class Codecs implements Codec<Object> {
-    private final PrimitiveCodecs primitiveCodecs;
+    private final BSONCodecs bsonCodecs;
     private final EncoderRegistry encoderRegistry;
     private final IterableCodec iterableCodec;
     private final ArrayCodec arrayCodec;
@@ -41,15 +41,15 @@ public class Codecs implements Codec<Object> {
     private final SimpleDocumentCodec simpleDocumentCodec;
     private final Codec<Object> defaultObjectCodec = new NoCodec();
 
-    public Codecs(final PrimitiveCodecs primitiveCodecs, final EncoderRegistry encoderRegistry) {
-        this(primitiveCodecs, new QueryFieldNameValidator(), encoderRegistry);
+    public Codecs(final BSONCodecs bsonCodecs, final EncoderRegistry encoderRegistry) {
+        this(bsonCodecs, new QueryFieldNameValidator(), encoderRegistry);
         //defaulting to the less rigorous, and maybe more common, validation - lets through $, dots etc.
     }
 
-    public Codecs(final PrimitiveCodecs primitiveCodecs,
+    public Codecs(final BSONCodecs bsonCodecs,
                   final Validator<String> fieldNameValidator,
                   final EncoderRegistry encoderRegistry) {
-        this.primitiveCodecs = primitiveCodecs;
+        this.bsonCodecs = bsonCodecs;
         this.encoderRegistry = encoderRegistry;
         arrayCodec = new ArrayCodec(this);
         iterableCodec = new IterableCodec(this);
@@ -60,13 +60,13 @@ public class Codecs implements Codec<Object> {
     }
 
     public static Codecs createDefault() {
-        return builder().primitiveCodecs(PrimitiveCodecs.createDefault()).build();
+        return builder().primitiveCodecs(BSONCodecs.createDefault()).build();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"}) // going to have some unchecked warnings because of all the casting from Object
     public void encode(final BSONWriter bsonWriter, final Object object) {
-        if (object == null || primitiveCodecs.canEncode(object.getClass())) {
-            primitiveCodecs.encode(bsonWriter, object);
+        if (object == null || bsonCodecs.canEncode(object.getClass())) {
+            bsonCodecs.encode(bsonWriter, object);
         }
         else if (encoderRegistry.get(object.getClass()) != null) {
             final Encoder<Object> codec = (Encoder<Object>) encoderRegistry.get(object.getClass());
@@ -116,8 +116,8 @@ public class Codecs implements Codec<Object> {
 
     //TODO: don't like this at all.  Feels like if it has a BSON type, it's a primitive
     public Object decode(final BSONReader reader) {
-        if (primitiveCodecs.canDecodeNextObject(reader)) {
-            return primitiveCodecs.decode(reader);
+        if (bsonCodecs.canDecodeNextObject(reader)) {
+            return bsonCodecs.decode(reader);
         } else if (reader.getCurrentBSONType() == BSONType.ARRAY) {
             return iterableCodec.decode(reader);
         } else if (reader.getCurrentBSONType() == BSONType.JAVASCRIPT_WITH_SCOPE) {
@@ -132,7 +132,7 @@ public class Codecs implements Codec<Object> {
 
     boolean canEncode(final Object object) {
         return object == null
-               || primitiveCodecs.canEncode(object.getClass())
+               || bsonCodecs.canEncode(object.getClass())
                || object.getClass().isArray()
                || object instanceof Map
                || object instanceof Iterable
@@ -142,7 +142,7 @@ public class Codecs implements Codec<Object> {
 
     public boolean canDecode(final Class<?> theClass) {
         return theClass.getClass().isArray()
-               || primitiveCodecs.canDecode(theClass)
+               || bsonCodecs.canDecode(theClass)
                || iterableCodec.getEncoderClass().isInstance(theClass)
                || mapCodec.getEncoderClass().isAssignableFrom(theClass)
                || dbRefEncoder.getEncoderClass().isInstance(theClass)
@@ -151,15 +151,15 @@ public class Codecs implements Codec<Object> {
     }
 
     public static class Builder {
-        private PrimitiveCodecs primitiveCodecs;
+        private BSONCodecs bsonCodecs;
 
-        public Builder primitiveCodecs(final PrimitiveCodecs aPrimitiveCodecs) {
-            this.primitiveCodecs = aPrimitiveCodecs;
+        public Builder primitiveCodecs(final BSONCodecs aBSONCodecs) {
+            this.bsonCodecs = aBSONCodecs;
             return this;
         }
 
         public Codecs build() {
-            return new Codecs(primitiveCodecs, new QueryFieldNameValidator(), new EncoderRegistry());
+            return new Codecs(bsonCodecs, new QueryFieldNameValidator(), new EncoderRegistry());
         }
     }
 }

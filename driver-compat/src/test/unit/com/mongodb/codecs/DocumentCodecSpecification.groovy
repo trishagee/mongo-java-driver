@@ -6,7 +6,7 @@ import org.bson.BasicBSONObject
 import org.bson.types.CodeWScope
 import org.bson.types.ObjectId
 import org.mongodb.Document
-import org.mongodb.codecs.PrimitiveCodecs
+import org.mongodb.codecs.BSONCodecs
 import spock.lang.Specification
 
 class DocumentCodecSpecification extends Specification {
@@ -18,7 +18,7 @@ class DocumentCodecSpecification extends Specification {
         BSONWriter bsonWriter = Mock()
 
         when:
-        new DocumentCodec(PrimitiveCodecs.createDefault()).encode(bsonWriter, document)
+        new DocumentCodec(BSONCodecs.createDefault()).encode(bsonWriter, document)
 
         then:
         1 * bsonWriter.writeStartDocument()
@@ -36,7 +36,7 @@ class DocumentCodecSpecification extends Specification {
         BSONWriter bsonWriter = Mock()
 
         when:
-        new DocumentCodec(PrimitiveCodecs.createDefault()).encode(bsonWriter, document)
+        new DocumentCodec(BSONCodecs.createDefault()).encode(bsonWriter, document)
 
         then:
         1 * bsonWriter.writeStartDocument()

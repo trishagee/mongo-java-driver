@@ -34,7 +34,7 @@ import static org.junit.Assert.assertNull;
 public class BSONDocumentBufferCodecTest extends DatabaseTestCase {
 
     private final BSONDocumentBufferCodec codec =
-            new BSONDocumentBufferCodec(new PowerOfTwoBufferPool(24), PrimitiveCodecs.createDefault());
+            new BSONDocumentBufferCodec(new PowerOfTwoBufferPool(24), BSONCodecs.createDefault());
 
     @Test
     public void shouldBeAbleToQueryThenInsert() {
@@ -59,7 +59,7 @@ public class BSONDocumentBufferCodecTest extends DatabaseTestCase {
         final BSONBinaryWriter writer = new BSONBinaryWriter(new BasicOutputBuffer(), true);
         final BSONDocumentBuffer documentBuffer;
         try {
-            new DocumentCodec(PrimitiveCodecs.createDefault()).encode(writer, doc);
+            new DocumentCodec(BSONCodecs.createDefault()).encode(writer, doc);
             documentBuffer = new BSONDocumentBuffer(writer.getBuffer().toByteArray());
         } finally {
             writer.close();
@@ -75,7 +75,7 @@ public class BSONDocumentBufferCodecTest extends DatabaseTestCase {
         final BSONBinaryWriter writer = new BSONBinaryWriter(new BasicOutputBuffer(), true);
         final BSONDocumentBuffer documentBuffer;
         try {
-            new DocumentCodec(PrimitiveCodecs.createDefault()).encode(writer, doc);
+            new DocumentCodec(BSONCodecs.createDefault()).encode(writer, doc);
             documentBuffer = new BSONDocumentBuffer(writer.getBuffer().toByteArray());
         } finally {
             writer.close();

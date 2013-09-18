@@ -19,8 +19,8 @@ package org.mongodb;
 import org.bson.BSONReader;
 import org.bson.BSONWriter;
 import org.bson.types.ObjectId;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
-import org.mongodb.codecs.PrimitiveCodecs;
 import org.mongodb.json.JSONMode;
 import org.mongodb.json.JSONReader;
 import org.mongodb.json.JSONReaderSettings;
@@ -97,7 +97,7 @@ public class Document implements Map<String, Object>, Serializable {
      */
     public static Document valueOf(final String s, final JSONMode mode) {
         final BSONReader bsonReader = new JSONReader(new JSONReaderSettings(mode), s);
-        return new DocumentCodec(PrimitiveCodecs.createDefault()).decode(bsonReader);
+        return new DocumentCodec(BSONCodecs.createDefault()).decode(bsonReader);
     }
 
     /**
@@ -252,7 +252,7 @@ public class Document implements Map<String, Object>, Serializable {
         // i.e. anything that requires a custom codec, like POJOs or custom CollectibleCodecs for generic Collections
         final StringWriter writer = new StringWriter();
         final BSONWriter bsonWriter = new JSONWriter(writer, new JSONWriterSettings(JSONMode.Strict));
-        final Codec<Document> codec = new DocumentCodec(PrimitiveCodecs.createDefault());
+        final Codec<Document> codec = new DocumentCodec(BSONCodecs.createDefault());
         codec.encode(bsonWriter, this);
 
         return writer.toString();

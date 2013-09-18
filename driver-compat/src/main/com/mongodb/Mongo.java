@@ -21,7 +21,7 @@ import org.mongodb.Codec;
 import org.mongodb.Document;
 import org.mongodb.ServerCursor;
 import org.mongodb.annotations.ThreadSafe;
-import org.mongodb.codecs.PrimitiveCodecs;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.command.ListDatabases;
 import org.mongodb.connection.BufferProvider;
 import org.mongodb.connection.Cluster;
@@ -292,7 +292,7 @@ public class Mongo {
 
     Mongo(final Cluster cluster, final MongoClientOptions options, final List<MongoCredential> credentialsList) {
         this.cluster = cluster;
-        this.documentCodec = new DocumentCodec(PrimitiveCodecs.createDefault());
+        this.documentCodec = new DocumentCodec(BSONCodecs.createDefault());
         this.options = options;
         this.readPreference = options.getReadPreference() != null ? options.getReadPreference() : ReadPreference.primary();
         this.writeConcern = options.getWriteConcern() != null ? options.getWriteConcern() : WriteConcern.UNACKNOWLEDGED;

@@ -37,7 +37,7 @@ public class DocumentEncodingPerformanceTest {
 
     @Before
     public void setUp() throws Exception {
-        documentCodec = new DocumentCodec(PrimitiveCodecs.createDefault());
+        documentCodec = new DocumentCodec(BSONCodecs.createDefault());
         bsonWriter = new StubBSONWriter();
     }
 

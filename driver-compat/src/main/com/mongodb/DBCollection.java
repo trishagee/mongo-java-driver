@@ -34,8 +34,8 @@ import org.mongodb.MongoCursor;
 import org.mongodb.MongoNamespace;
 import org.mongodb.OrderBy;
 import org.mongodb.annotations.ThreadSafe;
+import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.ObjectIdGenerator;
-import org.mongodb.codecs.PrimitiveCodecs;
 import org.mongodb.command.AggregateCommand;
 import org.mongodb.command.Command;
 import org.mongodb.command.Distinct;
@@ -167,7 +167,7 @@ public class DBCollection {
      * @param name the name of the collection
      */
     protected DBCollection(final DB database, final String name) {
-        this(name, database, new DocumentCodec(PrimitiveCodecs.createDefault()));
+        this(name, database, new DocumentCodec(BSONCodecs.createDefault()));
     }
 
     /**
@@ -1639,8 +1639,8 @@ public class DBCollection {
         );
     }
 
-    private PrimitiveCodecs getPrimitiveCodecs() {
-        return PrimitiveCodecs.createDefault();
+    private BSONCodecs getPrimitiveCodecs() {
+        return BSONCodecs.createDefault();
     }
 
     private Document toIndexDetailsDocument(final DBObject keys, final DBObject options) {

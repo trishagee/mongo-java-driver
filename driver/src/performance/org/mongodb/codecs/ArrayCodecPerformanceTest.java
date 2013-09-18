@@ -204,7 +204,7 @@ public class ArrayCodecPerformanceTest {
         }
     }
 
-    private final class MyPrimitiveCodecs extends PrimitiveCodecs {
+    private final class MyPrimitiveCodecs extends BSONCodecs {
         private int objectsEncoded = 0;
 
         private MyPrimitiveCodecs() {

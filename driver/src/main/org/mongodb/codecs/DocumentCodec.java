@@ -32,20 +32,20 @@ public class DocumentCodec implements Codec<Document> {
     private final Codecs codecs;
 
     public DocumentCodec() {
-        this(PrimitiveCodecs.createDefault());
+        this(BSONCodecs.createDefault());
     }
 
-    public DocumentCodec(final PrimitiveCodecs primitiveCodecs) {
-        this(primitiveCodecs, new QueryFieldNameValidator());
+    public DocumentCodec(final BSONCodecs bsonCodecs) {
+        this(bsonCodecs, new QueryFieldNameValidator());
     }
 
-    protected DocumentCodec(final PrimitiveCodecs primitiveCodecs, final Validator<String> fieldNameValidator) {
-        this(fieldNameValidator, new Codecs(primitiveCodecs, fieldNameValidator, new EncoderRegistry()));
+    protected DocumentCodec(final BSONCodecs bsonCodecs, final Validator<String> fieldNameValidator) {
+        this(fieldNameValidator, new Codecs(bsonCodecs, fieldNameValidator, new EncoderRegistry()));
     }
 
-    protected DocumentCodec(final PrimitiveCodecs primitiveCodecs, final Validator<String> fieldNameValidator,
+    protected DocumentCodec(final BSONCodecs bsonCodecs, final Validator<String> fieldNameValidator,
                             final EncoderRegistry encoderRegistry) {
-        this(fieldNameValidator, new Codecs(primitiveCodecs, fieldNameValidator, encoderRegistry));
+        this(fieldNameValidator, new Codecs(bsonCodecs, fieldNameValidator, encoderRegistry));
     }
 
     protected DocumentCodec(final Validator<String> fieldNameValidator, final Codecs codecs) {
