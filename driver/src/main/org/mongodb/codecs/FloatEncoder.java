@@ -16,22 +16,16 @@
 
 package org.mongodb.codecs;
 
-import org.bson.BSONReader;
 import org.bson.BSONWriter;
-import org.mongodb.Codec;
+import org.mongodb.Encoder;
 
 /**
- *  Float codec
+ *  Encoder for Floats - they get encoded as a double.
  */
-public class FloatCodec implements Codec<Float> {
+public class FloatEncoder implements Encoder<Float> {
     @Override
     public void encode(final BSONWriter bsonWriter, final Float value) {
         bsonWriter.writeDouble(value);
-    }
-
-    @Override
-    public Float decode(final BSONReader reader) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

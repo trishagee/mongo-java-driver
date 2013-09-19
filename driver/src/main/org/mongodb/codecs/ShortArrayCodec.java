@@ -20,17 +20,17 @@ import org.bson.BSONWriter;
 import org.mongodb.Encoder;
 
 public class ShortArrayCodec implements Encoder<short[]> {
-    private final ShortCodec shortCodec;
+    private final ShortEncoder shortEncoder;
 
     public ShortArrayCodec() {
-        shortCodec = new ShortCodec();
+        shortEncoder = new ShortEncoder();
     }
 
     @Override
     public void encode(final BSONWriter bsonWriter, final short[] value) {
         bsonWriter.writeStartArray();
         for (short shortValue : value) {
-            shortCodec.encode(bsonWriter, shortValue);
+            shortEncoder.encode(bsonWriter, shortValue);
         }
         bsonWriter.writeEndArray();
     }

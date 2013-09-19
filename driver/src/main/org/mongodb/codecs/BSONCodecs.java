@@ -33,26 +33,23 @@ import java.util.Set;
 // TODO: this is getting better, but still not sure
 
 /**
- * Holder for all the codec mappings.
+ * Holder for codecs that translate directly to or from BSON types.
  */
-// Suspect that the rawtypes warnings are telling us something that we haven't done cleanly
-// we should address these
-@SuppressWarnings("rawtypes")
 public class BSONCodecs implements Codec<Object> {
-    private Map<Class, Encoder<?>> classEncoderMap = new HashMap<Class, Encoder<?>>();
+    private Map<Class<?>, Encoder<?>> classEncoderMap = new HashMap<Class<?>, Encoder<?>>();
     private Map<BSONType, Decoder<?>> bsonTypeDecoderMap = new EnumMap<BSONType, Decoder<?>>(BSONType.class);
-    private Set<Class> supportedDecodeTypes = new HashSet<Class>();
+    private Set<Class<?>> supportedDecodeTypes = new HashSet<Class<?>>();
 
-    BSONCodecs(final Map<Class, Encoder<?>> classEncoderMap,
+    BSONCodecs(final Map<Class<?>, Encoder<?>> classEncoderMap,
                final Map<BSONType, Decoder<?>> bsonTypeDecoderMap,
-               final Set<Class> supportedDecodeTypes) {
+               final Set<Class<?>> supportedDecodeTypes) {
         this.classEncoderMap = classEncoderMap;
         this.bsonTypeDecoderMap = bsonTypeDecoderMap;
         this.supportedDecodeTypes = supportedDecodeTypes;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void encode(final BSONWriter writer, final Object value) {
         final Encoder codec;
         if (value == null) {
@@ -67,6 +64,7 @@ public class BSONCodecs implements Codec<Object> {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public Object decode(final BSONReader reader) {
         final BSONType bsonType = reader.getCurrentBSONType();
         final Decoder codec = bsonTypeDecoderMap.get(bsonType);
@@ -89,31 +87,8 @@ public class BSONCodecs implements Codec<Object> {
         return new Builder(base);
     }
 
-    // TODO: find a proper way to do this...
     public static BSONCodecs createDefault() {
-        return builder()
-               .objectIdCodec(new ObjectIdCodec())
-               .integerCodec(new IntegerCodec())
-               .longCodec(new LongCodec())
-               .stringCodec(new StringCodec())
-               .doubleCodec(new DoubleCodec())
-               .dateCodec(new DateCodec())
-               .timestampCodec(new TimestampCodec())
-               .booleanCodec(new BooleanCodec())
-               .patternCodec(new PatternCodec())
-               .minKeyCodec(new MinKeyCodec())
-               .maxKeyCodec(new MaxKeyCodec())
-               .javascriptCodec(new CodeCodec())
-               .nullCodec(new NullCodec())
-               .otherEncoder(new FloatCodec())
-               .otherEncoder(new ShortCodec())
-               .otherEncoder(new ByteCodec())
-               .otherEncoder(new ByteArrayCodec())
-               .otherEncoder(new BinaryEncoder())
-               .otherEncoder(new UUIDEncoder())
-               .otherDecoder(BSONType.DB_POINTER, new DBPointerDecoder())
-               .binaryDecoder(new TransformingBinaryDecoder())
-               .build();
+        return builder().initialiseWithDefaults().build();
     }
 
     boolean canEncode(final Class<?> aClass) {
@@ -124,14 +99,14 @@ public class BSONCodecs implements Codec<Object> {
         return bsonTypeDecoderMap.containsKey(reader.getCurrentBSONType());
     }
 
-    boolean canDecode(final Class theClass) {
+    boolean canDecode(final Class<?> theClass) {
         return supportedDecodeTypes.contains(theClass);
     }
 
     public static class Builder {
-        private final Map<Class, Encoder<?>> classEncoderMap = new HashMap<Class, Encoder<?>>();
+        private final Map<Class<?>, Encoder<?>> classEncoderMap = new HashMap<Class<?>, Encoder<?>>();
         private final Map<BSONType, Decoder<?>> bsonTypeDecoderMap = new HashMap<BSONType, Decoder<?>>();
-        private final Set<Class> supportedDecodeTypes = new HashSet<Class>();
+        private final Set<Class<?>> supportedDecodeTypes = new HashSet<Class<?>>();
 
         public Builder() {
         }
@@ -142,73 +117,97 @@ public class BSONCodecs implements Codec<Object> {
             supportedDecodeTypes.addAll(base.supportedDecodeTypes);
         }
 
+        public Builder initialiseWithDefaults() {
+            //setup all the default codecs
+            return this.objectIdCodec(new ObjectIdCodec())
+                       .integerCodec(new IntegerCodec())
+                       .longCodec(new LongCodec())
+                       .stringCodec(new StringCodec())
+                       .doubleCodec(new DoubleCodec())
+                       .dateCodec(new DateCodec())
+                       .timestampCodec(new TimestampCodec())
+                       .booleanCodec(new BooleanCodec())
+                       .patternCodec(new PatternCodec())
+                       .minKeyCodec(new MinKeyCodec())
+                       .maxKeyCodec(new MaxKeyCodec())
+                       .javascriptCodec(new CodeCodec())
+                       .nullCodec(new NullCodec())
+                       .otherEncoder(new FloatEncoder())
+                       .otherEncoder(new ShortEncoder())
+                       .otherEncoder(new ByteEncoder())
+                       .otherEncoder(new ByteArrayEncoder())
+                       .otherEncoder(new BinaryEncoder())
+                       .otherEncoder(new UUIDEncoder())
+                       .otherDecoder(BSONType.DB_POINTER, new DBPointerDecoder())
+                       .binaryDecoder(new TransformingBinaryDecoder());
+        }
 
-        public Builder objectIdCodec(final Codec codec) {
+        public Builder objectIdCodec(final Codec<?> codec) {
             registerCodec(BSONType.OBJECT_ID, codec);
             return this;
         }
 
-        public Builder integerCodec(final Codec codec) {
+        public Builder integerCodec(final Codec<?> codec) {
             registerCodec(BSONType.INT32, codec);
             return this;
         }
 
-        public Builder longCodec(final Codec codec) {
+        public Builder longCodec(final Codec<?> codec) {
             registerCodec(BSONType.INT64, codec);
             return this;
         }
 
-        public Builder stringCodec(final Codec codec) {
+        public Builder stringCodec(final Codec<?> codec) {
             registerCodec(BSONType.STRING, codec);
             return this;
         }
 
-        public Builder doubleCodec(final Codec codec) {
+        public Builder doubleCodec(final Codec<?> codec) {
             registerCodec(BSONType.DOUBLE, codec);
             return this;
         }
 
-        public Builder binaryDecoder(final Decoder decoder) {
+        public Builder binaryDecoder(final Decoder<?> decoder) {
             bsonTypeDecoderMap.put(BSONType.BINARY, decoder);
             return this;
         }
 
-        public Builder dateCodec(final Codec codec) {
+        public Builder dateCodec(final Codec<?> codec) {
             registerCodec(BSONType.DATE_TIME, codec);
             return this;
         }
 
-        public Builder timestampCodec(final Codec codec) {
+        public Builder timestampCodec(final Codec<?> codec) {
             registerCodec(BSONType.TIMESTAMP, codec);
             return this;
         }
 
-        public Builder booleanCodec(final Codec codec) {
+        public Builder booleanCodec(final Codec<?> codec) {
             registerCodec(BSONType.BOOLEAN, codec);
             return this;
         }
 
-        public Builder patternCodec(final Codec codec) {
+        public Builder patternCodec(final Codec<?> codec) {
             registerCodec(BSONType.REGULAR_EXPRESSION, codec);
             return this;
         }
 
-        public Builder minKeyCodec(final Codec codec) {
+        public Builder minKeyCodec(final Codec<?> codec) {
             registerCodec(BSONType.MIN_KEY, codec);
             return this;
         }
 
-        public Builder maxKeyCodec(final Codec codec) {
+        public Builder maxKeyCodec(final Codec<?> codec) {
             registerCodec(BSONType.MAX_KEY, codec);
             return this;
         }
 
-        public Builder javascriptCodec(final Codec codec) {
+        public Builder javascriptCodec(final Codec<?> codec) {
             registerCodec(BSONType.JAVASCRIPT, codec);
             return this;
         }
 
-        public Builder nullCodec(final Codec codec) {
+        public Builder nullCodec(final Codec<?> codec) {
             registerCodec(BSONType.NULL, codec);
             return this;
         }
@@ -219,7 +218,7 @@ public class BSONCodecs implements Codec<Object> {
          * @param encoder the encoder
          * @return this
          */
-        public Builder otherEncoder(final Encoder encoder) {
+        public Builder otherEncoder(final Encoder<?> encoder) {
             classEncoderMap.put(encoder.getEncoderClass(), encoder);
             return this;
         }
@@ -231,7 +230,7 @@ public class BSONCodecs implements Codec<Object> {
          * @param decoder  the decoder
          * @return this
          */
-        public Builder otherDecoder(final BSONType bsonType, final Decoder decoder) {
+        public Builder otherDecoder(final BSONType bsonType, final Decoder<?> decoder) {
             bsonTypeDecoderMap.put(bsonType, decoder);
             return this;
         }

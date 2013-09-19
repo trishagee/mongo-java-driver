@@ -23,7 +23,7 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
     private final LongArrayCodec longArrayCodec;
     private final BooleanArrayCodec booleanArrayCodec;
     private final DoubleArrayCodec doubleArrayCodec;
-    private final ByteArrayCodec byteArrayCodec;
+    private final ByteArrayEncoder byteArrayEncoder;
     private final FloatArrayCodec floatArrayCodec;
     private final ShortArrayCodec shortArrayCodec;
     private final StringArrayCodec stringArrayCodec;
@@ -35,7 +35,7 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
         longArrayCodec = new LongArrayCodec();
         booleanArrayCodec = new BooleanArrayCodec();
         doubleArrayCodec = new DoubleArrayCodec();
-        byteArrayCodec = new ByteArrayCodec();
+        byteArrayEncoder = new ByteArrayEncoder();
         floatArrayCodec = new FloatArrayCodec();
         shortArrayCodec = new ShortArrayCodec();
         stringArrayCodec = new StringArrayCodec();
@@ -91,7 +91,7 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
     }
 
     public void encode(final BSONWriter bsonWriter, final byte[] array) {
-        byteArrayCodec.encode(bsonWriter, array);
+        byteArrayEncoder.encode(bsonWriter, array);
     }
 
     public void encode(final BSONWriter bsonWriter, final float[] array) {

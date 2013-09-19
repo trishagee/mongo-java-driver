@@ -20,17 +20,17 @@ import org.bson.BSONWriter;
 import org.mongodb.Encoder;
 
 public class FloatArrayCodec implements Encoder<float[]> {
-    private final FloatCodec floatCodec;
+    private final FloatEncoder floatEncoder;
 
     public FloatArrayCodec() {
-        floatCodec = new FloatCodec();
+        floatEncoder = new FloatEncoder();
     }
 
     @Override
     public void encode(final BSONWriter bsonWriter, final float[] value) {
         bsonWriter.writeStartArray();
         for (float floatValue : value) {
-            floatCodec.encode(bsonWriter, floatValue);
+            floatEncoder.encode(bsonWriter, floatValue);
         }
         bsonWriter.writeEndArray();
     }
