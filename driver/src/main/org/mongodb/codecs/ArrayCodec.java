@@ -17,8 +17,9 @@
 package org.mongodb.codecs;
 
 import org.bson.BSONWriter;
+import org.mongodb.Encoder;
 
-public class ArrayCodec implements ComplexTypeEncoder<Object> {
+public class ArrayCodec implements Encoder<Object> {
     private final IntegerArrayCodec integerArrayCodec;
     private final LongArrayCodec longArrayCodec;
     private final BooleanArrayCodec booleanArrayCodec;
@@ -27,9 +28,9 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
     private final FloatArrayCodec floatArrayCodec;
     private final ShortArrayCodec shortArrayCodec;
     private final StringArrayCodec stringArrayCodec;
-    private final Codecs codecs;
+    private final BSONCodecs codecs;
 
-    public ArrayCodec(final Codecs codecs) {
+    public ArrayCodec(final BSONCodecs codecs) {
         this.codecs = codecs;
         integerArrayCodec = new IntegerArrayCodec();
         longArrayCodec = new LongArrayCodec();
@@ -43,6 +44,9 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
 
     @Override
     public void encode(final BSONWriter bsonWriter, final Object object) {
+        if (!object.getClass().isArray()) {
+            throw new IllegalArgumentException("ArrayCodec cannot encode non-array object " + object);
+        }
         if (object instanceof int[]) {
             encode(bsonWriter, (int[]) object);
         } else if (object instanceof long[]) {
@@ -61,9 +65,12 @@ public class ArrayCodec implements ComplexTypeEncoder<Object> {
             encode(bsonWriter, (String[]) object);
         } else if (object instanceof Object[]) {
             encode(bsonWriter, (Object[]) object);
-        } else {
-            System.out.println("AARRGGHH");
         }
+    }
+
+    @Override
+    public Class<Object> getEncoderClass() {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     public void encode(final BSONWriter bsonWriter, final Object[] array) {

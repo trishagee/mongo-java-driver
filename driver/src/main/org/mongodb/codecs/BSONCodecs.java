@@ -40,12 +40,19 @@ public class BSONCodecs implements Codec<Object> {
     private Map<BSONType, Decoder<?>> bsonTypeDecoderMap = new EnumMap<BSONType, Decoder<?>>(BSONType.class);
     private Set<Class<?>> supportedDecodeTypes = new HashSet<Class<?>>();
 
+    private final IterableCodec iterableCodec;
+    private final ArrayCodec arrayCodec;
+
     BSONCodecs(final Map<Class<?>, Encoder<?>> classEncoderMap,
                final Map<BSONType, Decoder<?>> bsonTypeDecoderMap,
                final Set<Class<?>> supportedDecodeTypes) {
         this.classEncoderMap = classEncoderMap;
         this.bsonTypeDecoderMap = bsonTypeDecoderMap;
         this.supportedDecodeTypes = supportedDecodeTypes;
+        iterableCodec = new IterableCodec(this);
+        registerCodec(BSONType.ARRAY, iterableCodec);
+        arrayCodec = new ArrayCodec(this);
+//        registerCodec(BSONType.DOCUMENT, new DocumentCodec(this));
     }
 
     @Override
@@ -54,6 +61,10 @@ public class BSONCodecs implements Codec<Object> {
         final Encoder codec;
         if (value == null) {
             codec = classEncoderMap.get(null);
+        } else if (value instanceof Iterable) {
+            codec = iterableCodec;
+        } else if (value.getClass().isArray()) {
+            codec = arrayCodec;
         } else {
             codec = classEncoderMap.get(value.getClass());
         }
@@ -92,7 +103,7 @@ public class BSONCodecs implements Codec<Object> {
     }
 
     boolean canEncode(final Class<?> aClass) {
-        return classEncoderMap.containsKey(aClass);
+        return classEncoderMap.containsKey(aClass) || Iterable.class.isAssignableFrom(aClass) || aClass.isArray();
     }
 
     boolean canDecodeNextObject(final BSONReader reader) {
@@ -244,5 +255,11 @@ public class BSONCodecs implements Codec<Object> {
             classEncoderMap.put(codec.getEncoderClass(), codec);
             supportedDecodeTypes.add(codec.getEncoderClass());
         }
+    }
+
+    private void registerCodec(final BSONType bsonType, final Codec<?> codec) {
+        bsonTypeDecoderMap.put(bsonType, codec);
+        classEncoderMap.put(codec.getEncoderClass(), codec);
+        supportedDecodeTypes.add(codec.getEncoderClass());
     }
 }

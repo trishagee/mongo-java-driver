@@ -210,13 +210,45 @@ class BSONCodecsSpecification extends Specification {
         !bsonCodecs.canDecode(Byte)
     }
 
+    def 'should be able to encode iterables'() {
+        expect:
+        bsonCodecs.canEncode(ArrayList)
+    }
+
+    def 'should encode iterables'() {
+        given:
+        BSONWriter writer = Mock()
+
+        when:
+        bsonCodecs.encode(writer, [1, 2, 3])
+
+        then:
+        1 * writer.writeStartArray();
+    }
+
+    def 'should be able to encode arrays'() {
+        expect:
+        bsonCodecs.canEncode(new int[0].class)
+    }
+
+    def 'should encode arrays '() {
+        given:
+        BSONWriter writer = Mock()
+
+        when:
+        bsonCodecs.encode(writer, [1, 2, 3] as int[])
+
+        then:
+        1 * writer.writeStartArray();
+    }
+
     def 'shouldBeAbleToDecodeDBPointer'() {
         given:
-        final byte[] bytes = [
+        byte[] bytes = [
                 26, 0, 0, 0, 12, 97, 0, 2, 0, 0, 0, 98, 0, 82, 9, 41, 108,
                 -42, -60, -29, -116, -7, 111, -1, -36, 0
         ];
-        final BSONReader reader = new BSONBinaryReader(
+        BSONReader reader = new BSONBinaryReader(
                 new BasicInputBuffer(new ByteBufNIO(ByteBuffer.wrap(bytes))), true
         );
 
@@ -224,11 +256,11 @@ class BSONCodecsSpecification extends Specification {
         reader.readName();
 
         when:
-        final Object object = bsonCodecs.decode(reader);
+        Object object = bsonCodecs.decode(reader);
 
         then:
         object instanceof DBRef;
-        final DBRef reference = (DBRef) object;
+        DBRef reference = (DBRef) object;
         reference.getRef() == 'b';
         reference.getId() instanceof ObjectId;
         reference.getId() == new ObjectId('5209296cd6c4e38cf96fffdc');
@@ -242,10 +274,10 @@ class BSONCodecsSpecification extends Specification {
         BSONWriter writer = Mock()
         Date dateToEncode = new Date()
 
-        final BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
+        BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
         builderWithDefaults.dateCodec(dateCodec);
         @Subject
-        final BSONCodecs codecs = builderWithDefaults.build();
+        BSONCodecs codecs = builderWithDefaults.build();
 
         when:
         codecs.encode(writer, dateToEncode);
@@ -262,10 +294,10 @@ class BSONCodecsSpecification extends Specification {
         BSONWriter writer = Mock()
         MyDate dateToEncode = new MyDate()
 
-        final BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
+        BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
         builderWithDefaults.dateCodec(dateCodec);
         @Subject
-        final BSONCodecs codecs = builderWithDefaults.build();
+        BSONCodecs codecs = builderWithDefaults.build();
 
         when:
         codecs.encode(writer, dateToEncode);
@@ -281,10 +313,10 @@ class BSONCodecsSpecification extends Specification {
         BSONReader reader = Mock()
         reader.getCurrentBSONType() >> { DATE_TIME }
 
-        final BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
+        BSONCodecs.Builder builderWithDefaults = BSONCodecs.builder().initialiseWithDefaults();
         builderWithDefaults.dateCodec(dateCodec);
         @Subject
-        final BSONCodecs codecs = builderWithDefaults.build();
+        BSONCodecs codecs = builderWithDefaults.build();
 
         when:
         codecs.decode(reader);
@@ -296,19 +328,19 @@ class BSONCodecsSpecification extends Specification {
     def 'shouldBeAbleToSetOtherDecoder'() {
         given:
         @SuppressWarnings('rawtypes')
-        final BSONCodecs codecs = BSONCodecs.builder(bsonCodecs).otherDecoder(BSONType.BINARY, new Decoder() {
+        BSONCodecs codecs = BSONCodecs.builder(bsonCodecs).otherDecoder(BSONType.BINARY, new Decoder() {
             @Override
-            Object decode(final BSONReader reader) {
+            Object decode(BSONReader reader) {
                 reader.readBinaryData().getData();
             }
         })                                  .build();
-        final StringWriter stringWriter = new StringWriter();
-        final BSONWriter bsonWriter = new JSONWriter(stringWriter);
-        final Binary binaryValue = new Binary(BSONBinarySubType.Binary, [1, 2, 3] as byte[]);
+        StringWriter stringWriter = new StringWriter();
+        BSONWriter bsonWriter = new JSONWriter(stringWriter);
+        Binary binaryValue = new Binary(BSONBinarySubType.Binary, [1, 2, 3] as byte[]);
         bsonWriter.writeStartDocument();
         bsonWriter.writeBinaryData('binary', binaryValue);
         bsonWriter.writeEndDocument();
-        final BSONReader bsonReader = new JSONReader(stringWriter.toString());
+        BSONReader bsonReader = new JSONReader(stringWriter.toString());
         bsonReader.readStartDocument();
         bsonReader.readName();
 

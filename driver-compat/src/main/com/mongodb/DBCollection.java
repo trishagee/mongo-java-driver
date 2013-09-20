@@ -422,9 +422,10 @@ public class DBCollection {
 
         final Document filter = toDocument(query, encoder, getDocumentCodec());
         final Document updateOperations = toDocument(update, encoder, getDocumentCodec());
-        final Update mongoUpdate = new Update(aWriteConcern.toNew(), filter, updateOperations)
-                .upsert(upsert)
-                .multi(multi);
+        final Update mongoUpdate = new Update(aWriteConcern.toNew(),
+                                              filter, updateOperations)
+                                   .upsert(upsert)
+                                   .multi(multi);
 
         return updateInternal(mongoUpdate, aWriteConcern);
     }

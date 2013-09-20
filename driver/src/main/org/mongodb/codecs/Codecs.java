@@ -34,16 +34,14 @@ public class Codecs implements Codec<Object> {
     private final BSONCodecs bsonCodecs;
     private final EncoderRegistry encoderRegistry;
     private final IterableCodec iterableCodec;
-    private final ArrayCodec arrayCodec;
     private final MapCodec mapCodec;
     private final DBRefEncoder dbRefEncoder;
     private final CodeWithScopeCodec codeWithScopeCodec;
     private final SimpleDocumentCodec simpleDocumentCodec;
-    private final Codec<Object> defaultObjectCodec = new NoCodec();
 
     public Codecs(final BSONCodecs bsonCodecs, final EncoderRegistry encoderRegistry) {
-        this(bsonCodecs, new QueryFieldNameValidator(), encoderRegistry);
         //defaulting to the less rigorous, and maybe more common, validation - lets through $, dots etc.
+        this(bsonCodecs, new QueryFieldNameValidator(), encoderRegistry);
     }
 
     public Codecs(final BSONCodecs bsonCodecs,
@@ -51,8 +49,7 @@ public class Codecs implements Codec<Object> {
                   final EncoderRegistry encoderRegistry) {
         this.bsonCodecs = bsonCodecs;
         this.encoderRegistry = encoderRegistry;
-        arrayCodec = new ArrayCodec(this);
-        iterableCodec = new IterableCodec(this);
+        iterableCodec = new IterableCodec(bsonCodecs);
         mapCodec = new MapCodec(this, fieldNameValidator);
         dbRefEncoder = new DBRefEncoder(this);
         codeWithScopeCodec = new CodeWithScopeCodec(this);
@@ -71,11 +68,7 @@ public class Codecs implements Codec<Object> {
         else if (encoderRegistry.get(object.getClass()) != null) {
             final Encoder<Object> codec = (Encoder<Object>) encoderRegistry.get(object.getClass());
             codec.encode(bsonWriter, object);
-        }
-        else if (object.getClass().isArray()) {
-            arrayCodec.encode(bsonWriter, object);
-        }
-        else if (object instanceof Map) {
+        } else if (object instanceof Map) {
             encode(bsonWriter, (Map) object);
         }
         else {
@@ -106,12 +99,6 @@ public class Codecs implements Codec<Object> {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    // needs to be a raw codec to support Pojo codec, but feels a bit wrong to do this
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public void setDefaultObjectCodec(final Codec codec) {
-        encoderRegistry.register(Object.class, codec);
     }
 
     //TODO: don't like this at all.  Feels like if it has a BSON type, it's a primitive
