@@ -28,14 +28,14 @@ import java.util.Map;
 
 public class SimpleDocumentCodec implements Codec<Document> {
     private final Validator<String> fieldNameValidator;
-    private final Codecs codecs;
+    private final BSONCodecs bsonCodecs;
 
-    public SimpleDocumentCodec(final Codecs codecs) {
-        this(codecs, new QueryFieldNameValidator());
+    public SimpleDocumentCodec(final BSONCodecs bsonCodecs) {
+        this(bsonCodecs, new QueryFieldNameValidator());
     }
 
-    protected SimpleDocumentCodec(final Codecs codecs, final Validator<String> fieldNameValidator) {
-        this.codecs = codecs;
+    protected SimpleDocumentCodec(final BSONCodecs bsonCodecs, final Validator<String> fieldNameValidator) {
+        this.bsonCodecs = bsonCodecs;
         this.fieldNameValidator = fieldNameValidator;
     }
 
@@ -54,7 +54,7 @@ public class SimpleDocumentCodec implements Codec<Document> {
 
     @SuppressWarnings("unchecked")
     protected void writeValue(final BSONWriter bsonWriter, final Object value) {
-        codecs.encode(bsonWriter, value);
+        bsonCodecs.encode(bsonWriter, value);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SimpleDocumentCodec implements Codec<Document> {
         reader.readStartDocument();
         while (reader.readBSONType() != BSONType.END_OF_DOCUMENT) {
             final String fieldName = reader.readName();
-            final Object value = codecs.decode(reader);
+            final Object value = bsonCodecs.decode(reader);
             document.put(fieldName, value);
         }
 

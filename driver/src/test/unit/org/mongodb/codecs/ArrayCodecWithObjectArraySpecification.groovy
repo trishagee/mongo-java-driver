@@ -22,10 +22,10 @@ import spock.lang.Subject
 
 class ArrayCodecWithObjectArraySpecification extends Specification {
     private final BSONWriter bsonWriter = Mock();
-    private final Codecs codecs = Mock();
+    private final BSONCodecs bsonCodecs = Mock();
 
     @Subject
-    private final ArrayCodec arrayCodec = new ArrayCodec(codecs);
+    private final ArrayCodec arrayCodec = new ArrayCodec(bsonCodecs);
 
     def 'should write start and end for array of objects and delegate encoding of object'() {
         given:
@@ -39,9 +39,9 @@ class ArrayCodecWithObjectArraySpecification extends Specification {
         then:
         1 * bsonWriter.writeStartArray();
         then:
-        1 * codecs.encode(bsonWriter, object1);
+        1 * bsonCodecs.encode(bsonWriter, object1);
         then:
-        1 * codecs.encode(bsonWriter, object2);
+        1 * bsonCodecs.encode(bsonWriter, object2);
         then:
         1 * bsonWriter.writeEndArray();
     }
@@ -59,9 +59,9 @@ class ArrayCodecWithObjectArraySpecification extends Specification {
         then:
         1 * bsonWriter.writeStartArray();
         then:
-        1 * codecs.encode(bsonWriter, object1);
+        1 * bsonCodecs.encode(bsonWriter, object1);
         then:
-        1 * codecs.encode(bsonWriter, object2);
+        1 * bsonCodecs.encode(bsonWriter, object2);
         then:
         1 * bsonWriter.writeEndArray();
     }

@@ -29,31 +29,23 @@ import java.util.Map;
 // TODO: decode into DBRef?
 public class DocumentCodec implements Codec<Document> {
     private final Validator<String> fieldNameValidator;
-    private final Codecs codecs;
+    private final BSONCodecs bsonCodecs;
 
     public DocumentCodec() {
         this(BSONCodecs.createDefault());
     }
 
-    public DocumentCodec(final BSONCodecs bsonCodecs) {
+    protected DocumentCodec(final BSONCodecs bsonCodecs) {
         this(bsonCodecs, new QueryFieldNameValidator());
     }
 
     protected DocumentCodec(final BSONCodecs bsonCodecs, final Validator<String> fieldNameValidator) {
-        this(fieldNameValidator, new Codecs(bsonCodecs, fieldNameValidator, new EncoderRegistry()));
+        this(fieldNameValidator, bsonCodecs);
     }
 
-    protected DocumentCodec(final BSONCodecs bsonCodecs, final Validator<String> fieldNameValidator,
-                            final EncoderRegistry encoderRegistry) {
-        this(fieldNameValidator, new Codecs(bsonCodecs, fieldNameValidator, encoderRegistry));
-    }
-
-    protected DocumentCodec(final Validator<String> fieldNameValidator, final Codecs codecs) {
-        if (codecs == null) {
-            throw new IllegalArgumentException("codecs is null");
-        }
+    protected DocumentCodec(final Validator<String> fieldNameValidator, final BSONCodecs bsonCodecs) {
         this.fieldNameValidator = fieldNameValidator;
-        this.codecs = codecs;
+        this.bsonCodecs = bsonCodecs;
     }
 
     @Override
@@ -83,7 +75,7 @@ public class DocumentCodec implements Codec<Document> {
 
     @SuppressWarnings("unchecked")
     protected void writeValue(final BSONWriter bsonWriter, final Object value) {
-        codecs.encode(bsonWriter, value);
+        bsonCodecs.encode(bsonWriter, value);
     }
 
     @Override
@@ -106,7 +98,7 @@ public class DocumentCodec implements Codec<Document> {
         if (bsonType.equals(BSONType.DOCUMENT)) {
             return this.decode(reader);
         } else {
-            return codecs.decode(reader);
+            return bsonCodecs.decode(reader);
         }
     }
 

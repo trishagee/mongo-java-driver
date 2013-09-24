@@ -154,7 +154,7 @@ class PojoEncoderSpecification extends Specification {
         encoderRegistry.register(SimpleObject, new PojoEncoder<SimpleObject>(codecs));
         PojoEncoder<ObjectWithMapOfObjects> pojoEncoder = new PojoEncoder<ObjectWithMapOfObjects>(codecs);
         //TODO: get rid of this - default object codec is a bit of a smell
-//        codecs.setDefaultObjectCodec(new PojoCodec<ObjectWithMapOfObjects>(codecs, null));
+//        bsonCodecs.setDefaultObjectCodec(new PojoCodec<ObjectWithMapOfObjects>(bsonCodecs, null));
 
         String simpleObjectValue = 'theValue';
 

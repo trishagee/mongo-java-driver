@@ -23,6 +23,8 @@ import org.mongodb.Codec;
 import org.mongodb.Decoder;
 import org.mongodb.Encoder;
 import org.mongodb.MongoException;
+import org.mongodb.codecs.validators.QueryFieldNameValidator;
+import org.mongodb.codecs.validators.Validator;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -45,14 +47,19 @@ public class BSONCodecs implements Codec<Object> {
 
     BSONCodecs(final Map<Class<?>, Encoder<?>> classEncoderMap,
                final Map<BSONType, Decoder<?>> bsonTypeDecoderMap,
-               final Set<Class<?>> supportedDecodeTypes) {
+               final Set<Class<?>> supportedDecodeTypes, final Validator<String> fieldNameValidator) {
         this.classEncoderMap = classEncoderMap;
         this.bsonTypeDecoderMap = bsonTypeDecoderMap;
         this.supportedDecodeTypes = supportedDecodeTypes;
         iterableCodec = new IterableCodec(this);
         registerCodec(BSONType.ARRAY, iterableCodec);
         arrayCodec = new ArrayCodec(this);
-//        registerCodec(BSONType.DOCUMENT, new DocumentCodec(this));
+        registerCodec(BSONType.DOCUMENT, new DocumentCodec(this, fieldNameValidator));
+        registerCodec(BSONType.JAVASCRIPT_WITH_SCOPE, new CodeWithScopeCodec(this));
+        DBRefEncoder dbRefEncoder = new DBRefEncoder(this);
+
+        classEncoderMap.put(dbRefEncoder.getEncoderClass(), dbRefEncoder);
+        supportedDecodeTypes.add(dbRefEncoder.getEncoderClass());
     }
 
     @Override
@@ -118,6 +125,7 @@ public class BSONCodecs implements Codec<Object> {
         private final Map<Class<?>, Encoder<?>> classEncoderMap = new HashMap<Class<?>, Encoder<?>>();
         private final Map<BSONType, Decoder<?>> bsonTypeDecoderMap = new HashMap<BSONType, Decoder<?>>();
         private final Set<Class<?>> supportedDecodeTypes = new HashSet<Class<?>>();
+        private Validator<String> fieldNameValidator;
 
         public Builder() {
         }
@@ -149,6 +157,7 @@ public class BSONCodecs implements Codec<Object> {
                        .otherEncoder(new ByteArrayEncoder())
                        .otherEncoder(new BinaryEncoder())
                        .otherEncoder(new UUIDEncoder())
+                       .fieldNameValidator(new QueryFieldNameValidator())
                        .otherDecoder(BSONType.DB_POINTER, new DBPointerDecoder())
                        .binaryDecoder(new TransformingBinaryDecoder());
         }
@@ -246,8 +255,13 @@ public class BSONCodecs implements Codec<Object> {
             return this;
         }
 
+        public Builder fieldNameValidator(final Validator<String> validator) {
+            this.fieldNameValidator = validator;
+            return this;
+        }
+
         public BSONCodecs build() {
-            return new BSONCodecs(classEncoderMap, bsonTypeDecoderMap, supportedDecodeTypes);
+            return new BSONCodecs(classEncoderMap, bsonTypeDecoderMap, supportedDecodeTypes, fieldNameValidator);
         }
 
         private void registerCodec(final BSONType bsonType, final Codec<?> codec) {

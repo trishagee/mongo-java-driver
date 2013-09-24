@@ -23,12 +23,12 @@ import org.mongodb.Codec;
 import org.mongodb.Document;
 
 public class CodeWithScopeCodec implements Codec<CodeWithScope> {
-    private final Codecs codecs;
+    private final BSONCodecs bsonCodecs;
     private final SimpleDocumentCodec simpleDocumentCodec;
 
-    public CodeWithScopeCodec(final Codecs codecs) {
-        this.codecs = codecs;
-        simpleDocumentCodec = new SimpleDocumentCodec(codecs);
+    public CodeWithScopeCodec(final BSONCodecs bsonCodecs) {
+        this.bsonCodecs = bsonCodecs;
+        simpleDocumentCodec = new SimpleDocumentCodec(bsonCodecs);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class CodeWithScopeCodec implements Codec<CodeWithScope> {
     @Override
     public void encode(final BSONWriter bsonWriter, final CodeWithScope codeWithScope) {
         bsonWriter.writeJavaScriptWithScope(codeWithScope.getCode());
-        codecs.encode(bsonWriter, codeWithScope.getScope());
+        bsonCodecs.encode(bsonWriter, codeWithScope.getScope());
     }
 
     @Override

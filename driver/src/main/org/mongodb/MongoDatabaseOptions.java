@@ -17,22 +17,16 @@
 package org.mongodb;
 
 import org.mongodb.annotations.Immutable;
-import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
 
 @Immutable
 public class MongoDatabaseOptions {
-    private final BSONCodecs bsonCodecs;
     private final WriteConcern writeConcern;
     private final ReadPreference readPreference;
     private final Codec<Document> documentCodec;
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public BSONCodecs getBsonCodecs() {
-        return bsonCodecs;
     }
 
     public WriteConcern getWriteConcern() {
@@ -49,29 +43,19 @@ public class MongoDatabaseOptions {
 
     public MongoDatabaseOptions withDefaults(final MongoClientOptions options) {
         final Builder builder = new Builder();
-        builder.bsonCodecs = getBsonCodecs() != null ? getBsonCodecs()
-                                                                    : options.getBsonCodecs();
         builder.writeConcern = getWriteConcern() != null ? getWriteConcern() : options.getWriteConcern();
         builder.readPreference = getReadPreference() != null ? getReadPreference() : options.getReadPreference();
-        builder.documentCodec = getDocumentCodec() != null ? getDocumentCodec()
-                                                                : new DocumentCodec(builder
-                                                                                         .bsonCodecs);
+        builder.documentCodec = getDocumentCodec() != null ? getDocumentCodec() : new DocumentCodec();
         return builder.build();
     }
 
     public static class Builder {
         //TODO: there is definitely a better way to share this state
         //CHECKSTYLE:OFF
-        BSONCodecs bsonCodecs;
         WriteConcern writeConcern;
         ReadPreference readPreference;
         Codec<Document> documentCodec;
         //CHECKSTYLE:ON
-
-        public Builder primitiveCodecs(final BSONCodecs aBSONCodecs) {
-            this.bsonCodecs = aBSONCodecs;
-            return this;
-        }
 
         public Builder writeConcern(final WriteConcern aWriteConcern) {
             this.writeConcern = aWriteConcern;
@@ -89,16 +73,14 @@ public class MongoDatabaseOptions {
         }
 
         public MongoDatabaseOptions build() {
-            return new MongoDatabaseOptions(bsonCodecs, writeConcern, readPreference, documentCodec);
+            return new MongoDatabaseOptions(writeConcern, readPreference, documentCodec);
         }
 
         Builder() {
         }
     }
 
-    MongoDatabaseOptions(final BSONCodecs bsonCodecs, final WriteConcern writeConcern,
-                         final ReadPreference readPreference, final Codec<Document> documentCodec) {
-        this.bsonCodecs = bsonCodecs;
+    MongoDatabaseOptions(final WriteConcern writeConcern, final ReadPreference readPreference, final Codec<Document> documentCodec) {
         this.writeConcern = writeConcern;
         this.readPreference = readPreference;
         this.documentCodec = documentCodec;

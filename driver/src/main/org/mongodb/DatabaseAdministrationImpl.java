@@ -16,7 +16,6 @@
 
 package org.mongodb;
 
-import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
 import org.mongodb.command.RenameCollectionOptions;
 import org.mongodb.operation.CommandOperation;
@@ -92,7 +91,7 @@ class DatabaseAdministrationImpl implements DatabaseAdministration {
     @Override
     public void renameCollection(final RenameCollectionOptions renameCollectionOptions) {
         final CommandResult commandResult = new CommandOperation("admin", renameCollectionOptions.toDocument(databaseName), null,
-                                                                 commandCodec, new DocumentCodec(BSONCodecs.createDefault()),
+                                                                 commandCodec, new DocumentCodec(),
                                                                  client.getCluster().getDescription(), client.getBufferProvider(),
                                                                  client.getSession(), false).execute();
         ErrorHandling.handleErrors(commandResult);

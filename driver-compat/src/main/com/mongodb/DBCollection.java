@@ -167,7 +167,7 @@ public class DBCollection {
      * @param name the name of the collection
      */
     protected DBCollection(final DB database, final String name) {
-        this(name, database, new DocumentCodec(BSONCodecs.createDefault()));
+        this(name, database, new DocumentCodec());
     }
 
     /**

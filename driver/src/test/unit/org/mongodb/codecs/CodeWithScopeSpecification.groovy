@@ -29,7 +29,7 @@ class CodeWithScopeSpecification extends Specification {
     private final BSONWriter bsonWriter = Mock();
 
     @Subject
-    private final CodeWithScopeCodec codeWithScopeCodec = new CodeWithScopeCodec();
+    private final CodeWithScopeCodec codeWithScopeCodec = new CodeWithScopeCodec(BSONCodecs.createDefault());
 
     def 'should encode code with scope as java script followed by document of scope'() {
         given:

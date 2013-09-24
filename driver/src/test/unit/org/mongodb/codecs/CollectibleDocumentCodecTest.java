@@ -41,7 +41,7 @@ public class CollectibleDocumentCodecTest {
 
     @Before
     public void setUp() {
-        codec = new CollectibleDocumentCodec(BSONCodecs.createDefault(), new IdGenerator() {
+        codec = new CollectibleDocumentCodec(new IdGenerator() {
             @Override
             public Object generate() {
                 return 1;
@@ -60,7 +60,7 @@ public class CollectibleDocumentCodecTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor() {
-        new CollectibleDocumentCodec(BSONCodecs.createDefault(), null);
+        new CollectibleDocumentCodec(null);
     }
 
     @Test

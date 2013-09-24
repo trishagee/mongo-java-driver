@@ -168,7 +168,7 @@ public abstract class WriteCommandProtocol implements Protocol<WriteResult> {
 
     protected static class CommandCodec<T> extends DocumentCodec {
         public CommandCodec(final Encoder<T> encoder) {
-            super(BSONCodecs.createDefault(), new QueryFieldNameValidator(), createEncoderRegistry(encoder));
+            super(BSONCodecs.createDefault(), new QueryFieldNameValidator());
         }
 
         private static <T> EncoderRegistry createEncoderRegistry(final Encoder<T> encoder) {

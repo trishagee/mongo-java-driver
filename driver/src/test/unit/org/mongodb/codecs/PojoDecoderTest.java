@@ -48,6 +48,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mongodb.codecs.CodecTestUtil.prepareReaderWithObjectToBeDecoded;
 
+@Ignore("removing support for POJOs right now to simplify codecs for core types")
 public class PojoDecoderTest {
 
     private final EncoderRegistry encoderRegistry = new EncoderRegistry();
@@ -192,7 +193,7 @@ public class PojoDecoderTest {
         assertThat(decodedPojo, is(pojo));
     }
 
-    @Test (expected = DecodingException.class)
+    @Test(expected = DecodingException.class)
     public void shouldNotDecodePojoWithArray() {
         final ArrayWrapper pojo = new ArrayWrapper(new int[]{1, 2, 3});
 
@@ -245,20 +246,23 @@ public class PojoDecoderTest {
         pojoDecoder.decode(reader, PrivateClass.class);
     }
 
-    private static class PrivateClass { }
+    private static class PrivateClass {
+    }
 
     @Test(expected = DecodingException.class)
     public void shouldNotBeAbleToDecodeAPojoWithoutANoArgsConstructor() {
         final WithoutNoArgsConstructor pojo = new WithoutNoArgsConstructor(1);
         final BSONReader reader = prepareReaderWithObjectToBeDecoded(pojo,
                                                                      new PojoCodec<WithoutNoArgsConstructor>(codecs,
-                                                                                                           WithoutNoArgsConstructor.class));
+                                                                                                             WithoutNoArgsConstructor
+                                                                                                             .class));
         pojoDecoder.decode(reader, WithoutNoArgsConstructor.class);
     }
 
     static class WithoutNoArgsConstructor {
         @SuppressWarnings("UnusedParameters")
-        WithoutNoArgsConstructor(final int someArg) { }
+        WithoutNoArgsConstructor(final int someArg) {
+        }
     }
 
     @Ignore("Not implemented.  Not sure how to at this stage, or if it's necessary")

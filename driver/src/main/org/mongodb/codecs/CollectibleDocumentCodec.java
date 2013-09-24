@@ -23,16 +23,15 @@ import org.mongodb.IdGenerator;
 import org.mongodb.codecs.validators.FieldNameValidator;
 
 /**
- * Codec for documents that go in collections, and therefore have an _id.  Ensures that the _id field is written
- * first.
+ * Codec for documents that go in collections, and therefore have an _id.  Ensures that the _id field is written first.
  */
 public class CollectibleDocumentCodec extends DocumentCodec implements CollectibleCodec<Document> {
     public static final String ID_FIELD_NAME = "_id";
     private final IdGenerator idGenerator;
 
-    public CollectibleDocumentCodec(final BSONCodecs bsonCodecs,
-                                    final IdGenerator idGenerator) {
-        super(bsonCodecs, new FieldNameValidator());
+    public CollectibleDocumentCodec(final IdGenerator idGenerator) {
+        super(BSONCodecs.builder().initialiseWithDefaults()
+                        .fieldNameValidator(new FieldNameValidator()).build(), new FieldNameValidator());
         if (idGenerator == null) {
             throw new IllegalArgumentException("idGenerator is null");
         }

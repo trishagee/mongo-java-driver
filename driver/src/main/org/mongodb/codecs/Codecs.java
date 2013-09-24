@@ -19,9 +19,7 @@ package org.mongodb.codecs;
 import org.bson.BSONReader;
 import org.bson.BSONType;
 import org.bson.BSONWriter;
-import org.bson.types.CodeWithScope;
 import org.mongodb.Codec;
-import org.mongodb.DBRef;
 import org.mongodb.Encoder;
 import org.mongodb.codecs.validators.QueryFieldNameValidator;
 import org.mongodb.codecs.validators.Validator;
@@ -35,9 +33,6 @@ public class Codecs implements Codec<Object> {
     private final EncoderRegistry encoderRegistry;
     private final IterableCodec iterableCodec;
     private final MapCodec mapCodec;
-    private final DBRefEncoder dbRefEncoder;
-    private final CodeWithScopeCodec codeWithScopeCodec;
-    private final SimpleDocumentCodec simpleDocumentCodec;
 
     public Codecs(final BSONCodecs bsonCodecs, final EncoderRegistry encoderRegistry) {
         //defaulting to the less rigorous, and maybe more common, validation - lets through $, dots etc.
@@ -51,9 +46,6 @@ public class Codecs implements Codec<Object> {
         this.encoderRegistry = encoderRegistry;
         iterableCodec = new IterableCodec(bsonCodecs);
         mapCodec = new MapCodec(this, fieldNameValidator);
-        dbRefEncoder = new DBRefEncoder(this);
-        codeWithScopeCodec = new CodeWithScopeCodec(this);
-        simpleDocumentCodec = new SimpleDocumentCodec(this);
     }
 
     public static Codecs createDefault() {
@@ -89,14 +81,6 @@ public class Codecs implements Codec<Object> {
         mapCodec.encode(bsonWriter, value);
     }
 
-    public void encode(final BSONWriter bsonWriter, final DBRef value) {
-        dbRefEncoder.encode(bsonWriter, value);
-    }
-
-    public void encode(final BSONWriter bsonWriter, final CodeWithScope value) {
-        codeWithScopeCodec.encode(bsonWriter, value);
-    }
-
     public static Builder builder() {
         return new Builder();
     }
@@ -107,10 +91,6 @@ public class Codecs implements Codec<Object> {
             return bsonCodecs.decode(reader);
         } else if (reader.getCurrentBSONType() == BSONType.ARRAY) {
             return iterableCodec.decode(reader);
-        } else if (reader.getCurrentBSONType() == BSONType.JAVASCRIPT_WITH_SCOPE) {
-            return codeWithScopeCodec.decode(reader);
-        } else if (reader.getCurrentBSONType() == BSONType.DOCUMENT) {
-            return simpleDocumentCodec.decode(reader);
         } else {
             throw new UnsupportedOperationException(format("The BSON type %s does not have a decoder associated with it.",
                                                            reader.getCurrentBSONType()));
@@ -122,19 +102,14 @@ public class Codecs implements Codec<Object> {
                || bsonCodecs.canEncode(object.getClass())
                || object.getClass().isArray()
                || object instanceof Map
-               || object instanceof Iterable
-               || object instanceof CodeWithScope
-               || object instanceof DBRef;
+               || object instanceof Iterable;
     }
 
     public boolean canDecode(final Class<?> theClass) {
         return theClass.getClass().isArray()
                || bsonCodecs.canDecode(theClass)
                || iterableCodec.getEncoderClass().isInstance(theClass)
-               || mapCodec.getEncoderClass().isAssignableFrom(theClass)
-               || dbRefEncoder.getEncoderClass().isInstance(theClass)
-               || codeWithScopeCodec.getEncoderClass().isInstance(theClass)
-               || simpleDocumentCodec.getEncoderClass().isInstance(theClass);
+               || mapCodec.getEncoderClass().isAssignableFrom(theClass);
     }
 
     public static class Builder {

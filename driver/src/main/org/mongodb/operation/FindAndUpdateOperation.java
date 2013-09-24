@@ -20,7 +20,6 @@ import org.mongodb.CommandResult;
 import org.mongodb.Decoder;
 import org.mongodb.Document;
 import org.mongodb.MongoNamespace;
-import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
 import org.mongodb.connection.BufferProvider;
 import org.mongodb.protocol.CommandProtocol;
@@ -37,7 +36,7 @@ public class FindAndUpdateOperation<T> extends BaseOperation<T> {
     private final MongoNamespace namespace;
     private final FindAndUpdate<T> findAndUpdate;
     private final CommandResultWithPayloadDecoder<T> resultDecoder;
-    private final DocumentCodec commandEncoder = new DocumentCodec(BSONCodecs.createDefault());
+    private final DocumentCodec commandEncoder = new DocumentCodec();
 
     public FindAndUpdateOperation(final MongoNamespace namespace, final FindAndUpdate<T> findAndUpdate, final Decoder<T> resultDecoder,
                                   final BufferProvider bufferProvider, final Session session, final boolean closeSession) {

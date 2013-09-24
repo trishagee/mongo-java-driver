@@ -16,23 +16,17 @@
 
 package com.mongodb.codecs;
 
-import com.mongodb.DBRef;
-import org.bson.types.CodeWScope;
 import org.mongodb.codecs.BSONCodecs;
-import org.mongodb.codecs.Codecs;
-import org.mongodb.codecs.EncoderRegistry;
-import org.mongodb.codecs.validators.QueryFieldNameValidator;
 
 public class DocumentCodec extends org.mongodb.codecs.DocumentCodec {
-    public DocumentCodec(final BSONCodecs bsonCodecs) {
-        super(new QueryFieldNameValidator(), constructCustomCodecs(bsonCodecs));
+    public DocumentCodec() {
+        super(constructCustomCodecs());
     }
 
-    private static Codecs constructCustomCodecs(final BSONCodecs bsonCodecs) {
-        final EncoderRegistry encoderRegistry = new EncoderRegistry();
-        final Codecs codecs = new Codecs(bsonCodecs, encoderRegistry);
-        encoderRegistry.register(DBRef.class, new DBRefEncoder(codecs));
-        encoderRegistry.register(CodeWScope.class, new CodeWScopeCodec(codecs));
-        return codecs;
+    private static BSONCodecs constructCustomCodecs() {
+        BSONCodecs.Builder builder = BSONCodecs.builder().initialiseWithDefaults();
+        builder.otherEncoder(new DBRefEncoder(null))
+               .otherEncoder(new CodeWScopeCodec(null));
+        return builder.build();
     }
 }

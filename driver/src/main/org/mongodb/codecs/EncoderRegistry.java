@@ -17,7 +17,6 @@
 package org.mongodb.codecs;
 
 import org.bson.types.CodeWithScope;
-import org.mongodb.DBRef;
 import org.mongodb.Encoder;
 import org.mongodb.codecs.validators.QueryFieldNameValidator;
 
@@ -38,19 +37,18 @@ public class EncoderRegistry {
 
     public EncoderRegistry() {
         codecs = new Codecs(bsonCodecs, defaultValidator, this);
-        classToEncoderMap.put(CodeWithScope.class, new CodeWithScopeCodec(codecs));
+        classToEncoderMap.put(CodeWithScope.class, new CodeWithScopeCodec(bsonCodecs));
         classToEncoderMap.put(Iterable.class, new IterableCodec(bsonCodecs));
-        classToEncoderMap.put(DBRef.class, new DBRefEncoder(codecs));
     }
 
     @SuppressWarnings("rawtypes")
     public Encoder getDefaultEncoder() {
-        return (Encoder) new DocumentCodec(bsonCodecs, defaultValidator, this);
+        return (Encoder) new DocumentCodec(bsonCodecs, defaultValidator);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"}) //not cool
     public <T> Encoder<T> get(final Class<T> aClass) {
-        for (Map.Entry<Class, Encoder> cur : classToEncoderMap.entrySet()) {
+        for (final Map.Entry<Class, Encoder> cur : classToEncoderMap.entrySet()) {
             if (cur.getKey().isAssignableFrom(aClass)) {
                 return cur.getValue();
             }

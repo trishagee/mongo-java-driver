@@ -24,7 +24,6 @@ import org.mongodb.MongoCommandFailureException;
 import org.mongodb.MongoCursor;
 import org.mongodb.MongoNamespace;
 import org.mongodb.annotations.ThreadSafe;
-import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.command.Command;
 import org.mongodb.command.Create;
 import org.mongodb.command.DropDatabase;
@@ -71,7 +70,7 @@ public class DB {
     }
 
     public DB(final Mongo mongo, final String dbName) {
-        this(mongo, dbName, new DocumentCodec(BSONCodecs.createDefault()));
+        this(mongo, dbName, new DocumentCodec());
     }
 
     /**

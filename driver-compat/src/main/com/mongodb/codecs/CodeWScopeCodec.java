@@ -4,14 +4,13 @@ import org.bson.BSONObject;
 import org.bson.BSONWriter;
 import org.bson.types.CodeWScope;
 import org.mongodb.Encoder;
-import org.mongodb.codecs.Codecs;
+import org.mongodb.codecs.BSONCodecs;
 
 public class CodeWScopeCodec implements Encoder<CodeWScope> {
+    private final BSONCodecs bsonCodecs;
 
-    private final Codecs codecs;
-
-    public CodeWScopeCodec(final Codecs codecs) {
-        this.codecs = codecs;
+    public CodeWScopeCodec(final BSONCodecs bsonCodecs) {
+        this.bsonCodecs = bsonCodecs;
     }
 
     @Override
@@ -27,9 +26,9 @@ public class CodeWScopeCodec implements Encoder<CodeWScope> {
 
     private void writeDocument(final BSONWriter bsonWriter, final BSONObject document) {
         bsonWriter.writeStartDocument();
-        for (String key : document.keySet()){
+        for (final String key : document.keySet()){
             bsonWriter.writeName(key);
-            codecs.encode(bsonWriter, document.get(key));
+            bsonCodecs.encode(bsonWriter, document.get(key));
         }
         bsonWriter.writeEndDocument();
     }

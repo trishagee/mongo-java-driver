@@ -27,10 +27,10 @@ import static org.mongodb.codecs.CodecTestUtil.prepareReaderWithObjectToBeDecode
 
 class DBRefCodecSpecification extends Specification {
     private final BSONWriter bsonWriter = Mock();
-    private final Codecs codecs = Mock();
+    private final BSONCodecs bsonCodecs = Mock();
 
     @Subject
-    private final DBRefEncoder dbRefCodec = new DBRefEncoder(codecs);
+    private final DBRefEncoder dbRefCodec = new DBRefEncoder(bsonCodecs);
 
     def 'should encode db ref as string namespace and delegate encoding of id to codecs'() {
         given:
@@ -48,7 +48,7 @@ class DBRefCodecSpecification extends Specification {
         then:
         1 * bsonWriter.writeName('$id');
         then:
-        1 * codecs.encode(bsonWriter, theId);
+        1 * bsonCodecs.encode(bsonWriter, theId);
         then:
         1 * bsonWriter.writeEndDocument();
     }

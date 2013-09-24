@@ -19,7 +19,6 @@ package org.mongodb;
 import org.bson.BSONReader;
 import org.bson.BSONWriter;
 import org.bson.types.ObjectId;
-import org.mongodb.codecs.BSONCodecs;
 import org.mongodb.codecs.DocumentCodec;
 import org.mongodb.json.JSONMode;
 import org.mongodb.json.JSONReader;
@@ -90,14 +89,14 @@ public class Document implements Map<String, Object>, Serializable {
     /**
      * Converts a string in JSON format to a {@code Document}
      *
-     * @param s document representation in JSON format
+     * @param json document representation in JSON format
      * @return a corresponding {@code Document} object
      * @throws org.mongodb.json.JSONParseException
      *          if the input is invalid
      */
-    public static Document valueOf(final String s, final JSONMode mode) {
-        final BSONReader bsonReader = new JSONReader(new JSONReaderSettings(mode), s);
-        return new DocumentCodec(BSONCodecs.createDefault()).decode(bsonReader);
+    public static Document valueOf(final String json, final JSONMode mode) {
+        final BSONReader bsonReader = new JSONReader(new JSONReaderSettings(mode), json);
+        return new DocumentCodec().decode(bsonReader);
     }
 
     /**
@@ -252,7 +251,7 @@ public class Document implements Map<String, Object>, Serializable {
         // i.e. anything that requires a custom codec, like POJOs or custom CollectibleCodecs for generic Collections
         final StringWriter writer = new StringWriter();
         final BSONWriter bsonWriter = new JSONWriter(writer, new JSONWriterSettings(JSONMode.Strict));
-        final Codec<Document> codec = new DocumentCodec(BSONCodecs.createDefault());
+        final Codec<Document> codec = new DocumentCodec();
         codec.encode(bsonWriter, this);
 
         return writer.toString();

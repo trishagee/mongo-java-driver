@@ -34,7 +34,6 @@ import com.mongodb.codecs.DocumentCodec
 import org.mongodb.Document
 import org.mongodb.MongoNamespace
 import org.mongodb.MongoQueryFailureException
-import org.mongodb.codecs.BSONCodecs
 import org.mongodb.session.Session
 import spock.lang.Specification
 import spock.lang.Subject
@@ -52,7 +51,7 @@ class DBCursorSpecification extends Specification {
     private DBCursor dbCursor
 
     def setup() {
-        collection.getDocumentCodec() >> { new DocumentCodec(BSONCodecs.createDefault()) }
+        collection.getDocumentCodec() >> { new DocumentCodec() }
         collection.getNamespace() >> { new MongoNamespace('test', 'test') }
         collection.getSession() >> { session }
         collection.getBufferPool() >> { getBufferProvider() }

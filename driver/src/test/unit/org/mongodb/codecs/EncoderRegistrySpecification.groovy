@@ -25,6 +25,7 @@ import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Subject
 
+@Ignore('not going to use this any more')
 class EncoderRegistrySpecification extends Specification {
     @Subject
     private final EncoderRegistry encoderRegistry = new EncoderRegistry()
