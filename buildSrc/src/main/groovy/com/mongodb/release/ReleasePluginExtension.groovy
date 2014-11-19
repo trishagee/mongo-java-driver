@@ -4,6 +4,7 @@ class ReleasePluginExtension {
     String releaseVersion
     String snapshotVersion
     String javadocDir
+    List<File> filesToUpdate = []
 
     def setReleaseVersion(String version) {
         int indexOfSnapshotTag = version.indexOf('-SNAPSHOT')

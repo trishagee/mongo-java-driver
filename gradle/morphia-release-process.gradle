@@ -2,5 +2,10 @@ apply plugin: 'release'
 
 release {
     releaseVersion = project('driver').version
+    
+    filesToUpdate =[
+        file(project('driver').file('src/main/com/mongodb/Mongo.java')),
+        file(project.file('build.gradle'))
+    ]
 //    javadocDir = project('morphia').javadoc.destinationDir
 }

@@ -77,7 +77,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @ThreadSafe
 public class Mongo {
     static final String ADMIN_DATABASE_NAME = "admin";
-    private static final String VERSION = "3.0.0-SNAPSHOT";
+    private static final String VERSION = "3.0.0-test-SNAPSHOT";
 
     private final ConcurrentMap<String, DB> dbCache = new ConcurrentHashMap<String, DB>();
 

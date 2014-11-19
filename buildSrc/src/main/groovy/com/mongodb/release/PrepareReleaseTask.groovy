@@ -23,8 +23,12 @@ class PrepareReleaseTask extends DefaultTask {
         
         def snapshotVersion = project.release.snapshotVersion
         def buildFile = project.file('build.gradle')
-        getLog().info "Updating ${buildFile.absolutePath} from ${snapshotVersion} to ${releaseVersion}"
-        project.ant.replaceregexp(file: buildFile, match: snapshotVersion, replace: releaseVersion)
+        getLog().info "Updating ${buildFile.absolutePath} & Mongo.java from ${snapshotVersion} to ${releaseVersion}"
+
+        project.release.filesToUpdate.each {
+            getLog().info "Updating ${it} & Mongo.java from ${snapshotVersion} to ${releaseVersion}"
+            project.ant.replaceregexp(file: it, match: snapshotVersion, replace: releaseVersion) 
+        }
 
         getLog().info 'Checking build file into git'
         def git = Git.open(new File('.'))
