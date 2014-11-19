@@ -26,7 +26,6 @@ class PrepareReleaseTask extends DefaultTask {
         getLog().info "Updating ${buildFile.absolutePath} & Mongo.java from ${snapshotVersion} to ${releaseVersion}"
 
         project.release.filesToUpdate.each {
-            getLog().info "Updating ${it} & Mongo.java from ${snapshotVersion} to ${releaseVersion}"
             project.ant.replaceregexp(file: it, match: snapshotVersion, replace: releaseVersion) 
         }
 
@@ -34,12 +33,12 @@ class PrepareReleaseTask extends DefaultTask {
         def git = Git.open(new File('.'))
         try {
             git.commit()
-               .setOnly(buildFile.name)
+               .setAll(true)
                .setMessage("Release ${releaseVersion}")
                .call()
         } catch (JGitInternalException e) {
             if (e.getMessage().equals('No changes')) {
-                // we probably already committed this file, we're done
+                // we probably already committed these files, we're done
                 // this is not an elegant way to make this idempotent, but it does work
                 return
             }
