@@ -1,6 +1,6 @@
 apply plugin: 'release'
 
 release {
-    releaseVersion = project('morphia').version
-    javadocDir = project('morphia').javadoc.destinationDir
+    releaseVersion = project('driver').version
+//    javadocDir = project('morphia').javadoc.destinationDir
 }

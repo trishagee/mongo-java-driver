@@ -19,6 +19,8 @@ class PrepareReleaseTask extends DefaultTask {
     @TaskAction
     def prepareGitForRelease() {
         def releaseVersion = project.release.releaseVersion
+        println releaseVersion
+        
         def snapshotVersion = project.release.snapshotVersion
         def buildFile = project.file('build.gradle')
         getLog().info "Updating ${buildFile.absolutePath} from ${snapshotVersion} to ${releaseVersion}"

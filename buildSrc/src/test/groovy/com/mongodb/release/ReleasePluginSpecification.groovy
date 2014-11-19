@@ -2,8 +2,10 @@ package com.mongodb.release
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 class ReleasePluginSpecification extends Specification {
     def 'should be able to add release plugin to a project and have it recognised'() {
         given:
