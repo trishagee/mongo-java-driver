@@ -32,6 +32,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
     artifacts {
         archives sourcesJar
         archives javadocJar
+        shadowJar
     }
 
     signing {
@@ -103,6 +104,10 @@ project(':bson') {
             url 'http://bsonspec.org/'
         }
     }
+
+    shadowJar {
+        baseName = 'bson-all'
+    }
 }
 
 project(':driver-core') {
@@ -129,4 +134,22 @@ project(':driver') {
             url 'http://www.mongodb.org'
         }
     }
+    
+    jar {
+        manifest.attributes(
+                'Bundle-License': 'http://www.apache.org/licenses/LICENSE-2.0.txt',
+                'Bundle-Name': 'MongoDB Java Driver',
+                'Bundle-SymbolicName': 'org.mongodb.mongo-java-driver',
+                'Import-Package': 'javax.management, javax.net, javax.net.ssl, javax.security.sasl, javax.security.auth.login, ' +
+                                  'javax.security.auth, org.ietf.jgss',
+                )
+    }
+
+    shadowJar {
+        dependencies {
+            exclude(dependency('io.netty:netty-all'))
+        }
+        baseName = 'driver-all'
+    }
+
 }
