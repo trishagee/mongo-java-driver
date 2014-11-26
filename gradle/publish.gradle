@@ -31,6 +31,8 @@ configure(subprojects.findAll { it.name != 'util' }) {
             // exclude all "provided" dependencies 
             exclude (project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name")} )
         }
+        // by default this is 'all', which leads to a jar file will an '-all' suffix. We want this to be the default without '-all'
+        classifier = null
     }
 
     publishing {
