@@ -43,7 +43,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
     apply plugin: 'groovy'
     apply plugin: 'codenarc'
     apply plugin: 'provided-base'
-    apply plugin: 'com.github.johnrengelman.shadow'
 
     evaluationDependsOn(':util')
 
@@ -188,12 +187,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
         options.encoding = 'UTF-8'
         options.charSet 'UTF-8'
         options.docEncoding 'UTF-8'
-    }
-
-    shadowJar {
-        dependencies {
-            exclude(dependency('org.slf4j:slf4j-api'))
-        }
     }
 
     idea {

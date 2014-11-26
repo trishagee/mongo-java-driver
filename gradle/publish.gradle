@@ -1,10 +1,19 @@
-// uses maven-publish to upload the artifacts to nexus
-// called using /.gradlew publish
-// see http://www.gradle.org/docs/current/userguide/publishing_maven.html for more details.
+// Uses:
+//   maven-publish 
+//    - uploads the artifacts to sonatype nexus
+//    - called using /.gradlew publish
+//    - see http://www.gradle.org/docs/current/userguide/publishing_maven.html for more details.
+//    - specific settings for each project's pom.xml are in the project build.gradle files
+//   shadow
+//    - creates an uberjar of all the classes needed for each release artifact
+//    - i.e. for "driver" this includes classes for driver + driver-core + bson
+//    - called using shadowJar
+//    - see https://github.com/johnrengelman/shadow
 
 configure(subprojects.findAll { it.name != 'util' }) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
     /* Artifacts for publishing */
     task sourceJar(type: Jar) {
@@ -15,6 +24,13 @@ configure(subprojects.findAll { it.name != 'util' }) {
     task javadocJar(type: Jar) {
         classifier = 'javadoc'
         from javadoc
+    }
+
+    shadowJar {
+        dependencies {
+            // exclude all "provided" dependencies 
+            exclude (project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name")} )
+        }
     }
 
     publishing {
@@ -67,58 +83,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
                 credentials {
                     username project.properties.sonatypeUsername
                     password project.properties.sonatypePassword
-                }
-            }
-        }
-    }
-}
-
-//
-// Configure the specific values for the published pom files for each project
-//
-project(':bson') {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                pom.withXml {
-                    asNode().appendNode('name', 'BSON')
-                    asNode().appendNode('description', 'The BSON libs')
-                    asNode().appendNode('url', 'http://bsonspec.org/')
-                }
-            }
-        }
-    }
-}
-
-project(':driver-core') {
-    archivesBaseName = 'mongo-java-driver-core'
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                pom.withXml {
-                    asNode().appendNode('name', 'MongoDB Java Driver')
-                    asNode().appendNode('description', 'The Java operations layer for the MongoDB Java Driver. Other third parties can ' +
-                                                       'wrap this layer to provide custom APIs')
-                    asNode().appendNode('url', 'http://www.mongodb.org')
-                }
-            }
-        }
-    }
-}
-
-
-project(':driver') {
-    archivesBaseName = 'mongo-java-driver'
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                pom.withXml {
-                    asNode().appendNode('name', 'MongoDB Java Driver')
-                    asNode().appendNode('description', 'The MongoDB Java Driver.  Includes backwards-compatible compatible API and new ' +
-                                                       'CRUD API')
-                    asNode().appendNode('url', 'http://www.mongodb.org')
                 }
             }
         }
