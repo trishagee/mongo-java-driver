@@ -2,7 +2,6 @@ package com.mongodb.release
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.JGitInternalException
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.slf4j.Logger
@@ -55,9 +54,10 @@ class PrepareReleaseTask extends DefaultTask {
         String username = project.property("github.credentials.username")
         String password = project.property("github.credentials.password")
 
-        git.push()
-           .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
-           .call()
+        //TODO add this back
+//        git.push()
+//           .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
+//           .call()
         
         project.version = releaseVersion
         project.subprojects { subproject ->

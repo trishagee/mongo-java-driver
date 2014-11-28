@@ -33,20 +33,18 @@ class ReleasePlugin implements Plugin<Project> {
     @Override
     void apply(final Project project) {
         this.project = project
-//        if (project.name != 'util') {
+        project.extensions.create('release', ReleasePluginExtension)
+        project.evaluationDependsOnChildren()
 
-            project.extensions.create('release', ReleasePluginExtension)
-            project.evaluationDependsOnChildren()
+        project.task('prepareRelease', type: PrepareReleaseTask, dependsOn: project.subprojects.clean)
+        // publish is currently configured in publish.gradle
 
-            project.task('prepareRelease', type: PrepareReleaseTask, dependsOn: project.subprojects.clean)
-            // publish is currently configured in publish.gradle
-            project.task('release', dependsOn: ['prepareRelease', project.subprojects.publish])
-
-//        project.task('draftReleaseNotes', type: DraftReleaseNotesTask, dependsOn: [project.subprojects.uploadArchives])
-//        project.task('publishJavadoc', type: PublishJavadocTask, dependsOn: ['draftReleaseNotes', project.subprojects.javadoc])
-//        project.task('updateToNextVersion', type: UpdateToNextVersionTask, dependsOn: 'publishJavadoc')
-//        project.task('release', dependsOn: 'updateToNextVersion')
-//        }
+        //TODO: add these back in
+//        project.task('draftReleaseNotes', type: DraftReleaseNotesTask, dependsOn: ['prepareRelease', project.subprojects.publish])
+        
+//        project.task('updateToNextVersion', type: UpdateToNextVersionTask, dependsOn: 'draftReleaseNotes')
+        project.task('updateToNextVersion', type: UpdateToNextVersionTask, dependsOn: 'prepareRelease')
+        project.task('release', dependsOn: 'updateToNextVersion')
     }
 
 }

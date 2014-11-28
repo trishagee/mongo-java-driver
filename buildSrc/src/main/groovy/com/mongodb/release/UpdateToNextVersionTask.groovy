@@ -15,7 +15,9 @@ class UpdateToNextVersionTask extends DefaultTask {
         def oldVersion = project.release.releaseVersion
         def newVersion = incrementToNextVersion(oldVersion)
         def buildFile = project.file('build.gradle')
-        project.ant.replaceregexp(file: buildFile, match: oldVersion, replace: newVersion)
+        project.release.filesToUpdate.each {
+            project.ant.replaceregexp(file: it, match: oldVersion, replace: newVersion)
+        }
 
         def git = Git.open(new File('.'))
         git.commit()
