@@ -15,33 +15,33 @@ configure(subprojects.findAll { it.name != 'util' }) {
     apply plugin: 'signing'
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    def snapshotVersion
-    def releaseVersion
+    // check whether this is a real release or a snapshot release. For real releases, call this with a command line option of 
+    // -DreleaseVersion={expectedReleaseVersion}, e.g. -DreleaseVersion=3.0.0
+    // if you don't pass in this parameter, we assume this is a SNAPSHOT release. 
+    def releaseVersion = System.getProperty('releaseVersion')
 
-    if (project.version.indexOf('-SNAPSHOT') >= 0) {
-        snapshotVersion = version
-        releaseVersion = version[0..<version.indexOf('-SNAPSHOT')]
-    } else {
-        // otherwise I assume the release version has already been updated to trim this from the build file
-        releaseVersion = version
-        snapshotVersion = "${releaseVersion}-SNAPSHOT"
+    if (releaseVersion) {
+        if (version.indexOf('-SNAPSHOT') >= 0) {
+            version = version[0..<version.indexOf('-SNAPSHOT')]
+        }
+        if (version != releaseVersion) {
+            throw new GradleException("The release version you gave does not match the project release version: " +
+                                      "-DreleaseVersion=$releaseVersion, projectReleaseVersion=${version}")
+        }
     }
 
     /* Artifacts for publishing */
     task sourceJar(type: Jar) {
-        version = releaseVersion
         classifier = 'sources'
         from sourceSets.main.allSource
     }
 
     task javadocJar(type: Jar) {
-        version = releaseVersion
         classifier = 'javadoc'
         from javadoc
     }
 
     shadowJar {
-        version = releaseVersion
         dependencies {
             // exclude all "provided" dependencies 
             exclude(project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name") })
@@ -53,7 +53,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                version = releaseVersion
                 artifact sourceJar
                 artifact javadocJar
                 // shadowJar builds the uberjar of the code from the module and all the modules it's dependent upon
@@ -84,8 +83,11 @@ configure(subprojects.findAll { it.name != 'util' }) {
     publishing {
         repositories {
             maven {
-                // for now I'm going to assume this is only for production releases, not snapshots
-                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                if (releaseVersion) {
+                    url 'https://oss.sonatype.org/content/repositories/snapshots'
+                } else {
+                    url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                }
 
                 credentials {
                     username project.properties.sonatypeUsername
