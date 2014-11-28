@@ -15,6 +15,18 @@ configure(subprojects.findAll { it.name != 'util' }) {
     apply plugin: 'signing'
     apply plugin: 'com.github.johnrengelman.shadow'
 
+    def snapshotVersion
+    def releaseVersion
+
+    if (project.version.indexOf('-SNAPSHOT') >= 0) {
+        snapshotVersion = version
+        releaseVersion = version[0..<version.indexOf('-SNAPSHOT')]
+    } else {
+        // otherwise I assume the release version has already been updated to trim this from the build file
+        releaseVersion = version
+        snapshotVersion = "${releaseVersion}-SNAPSHOT"
+    }
+
     /* Artifacts for publishing */
     task sourceJar(type: Jar) {
         classifier = 'sources'
@@ -29,7 +41,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
     shadowJar {
         dependencies {
             // exclude all "provided" dependencies 
-            exclude (project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name")} )
+            exclude(project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name") })
         }
         // by default this is 'all', which leads to a jar file will an '-all' suffix. We want this to be the default without '-all'
         classifier = null
@@ -37,7 +49,8 @@ configure(subprojects.findAll { it.name != 'util' }) {
 
     publishing {
         publications {
-            mavenJava(MavenPublication) {
+            release(MavenPublication) {
+                version = releaseVersion
                 artifact sourceJar
                 artifact javadocJar
                 // shadowJar builds the uberjar of the code from the module and all the modules it's dependent upon
@@ -60,14 +73,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
                     def developers = asNode().appendNode('developers').appendNode('developer')
                     developers.appendNode('name', 'Various')
                     developers.appendNode('organization', '10gen')
-
-                    // for some reason, when building with the shadowJar, the pom is generated with a "packaging" node with a "pom" value
-                    // we're going to remove this node as if we were following the default for publishing, this would not exist
-                    // alternatively, you can use the code to alter it.value to 'jar'
-                    asNode().packaging.findAll() {
-                        it.replaceNode {}
-                    }
-
                 }
             }
         }
@@ -76,17 +81,17 @@ configure(subprojects.findAll { it.name != 'util' }) {
     publishing {
         repositories {
             maven {
-                if (project.version.endsWith('-SNAPSHOT')) {
-                    url 'https://oss.sonatype.org/content/repositories/snapshots'
-                } else {
-                    url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-                }
+                // for now I'm going to assume this is only for production releases, not snapshots
+                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
 
                 credentials {
                     username project.properties.sonatypeUsername
                     password project.properties.sonatypePassword
                 }
+                // this can be used for testing
+//                url "$buildDir/repo"
             }
         }
     }
+
 }

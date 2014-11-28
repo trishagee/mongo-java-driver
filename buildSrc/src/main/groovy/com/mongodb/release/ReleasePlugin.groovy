@@ -15,7 +15,7 @@ import org.gradle.api.Project
  * As such, you need to provide the configuration those tools need.  You'll need Nexus and Github credentials in 
  * <code>~/.gradle/gradle.properties</code>, and Github credentials in <code>~/.github</code> - this duplication is because the two 
  * git-related libraries get their configuration from different places.
- * 
+ *
  * The keys you need to supply values for in <code>~/.gradle/gradle.properties</code> are:
  * <ul>
  *     <li>sonatypeUsername</li>
@@ -33,17 +33,20 @@ class ReleasePlugin implements Plugin<Project> {
     @Override
     void apply(final Project project) {
         this.project = project
-        project.extensions.create('release', ReleasePluginExtension)
-        project.evaluationDependsOnChildren()
+//        if (project.name != 'util') {
 
-        project.task('prepareRelease', type: PrepareReleaseTask, dependsOn: project.subprojects.clean)
-        // uploadArchives is currently configured in maven-deployment.gradle
-        project.task('release', dependsOn: ['prepareRelease', project.subprojects.uploadArchives])
+            project.extensions.create('release', ReleasePluginExtension)
+            project.evaluationDependsOnChildren()
+
+            project.task('prepareRelease', type: PrepareReleaseTask, dependsOn: project.subprojects.clean)
+            // publish is currently configured in publish.gradle
+            project.task('release', dependsOn: ['prepareRelease', project.subprojects.publish])
 
 //        project.task('draftReleaseNotes', type: DraftReleaseNotesTask, dependsOn: [project.subprojects.uploadArchives])
 //        project.task('publishJavadoc', type: PublishJavadocTask, dependsOn: ['draftReleaseNotes', project.subprojects.javadoc])
 //        project.task('updateToNextVersion', type: UpdateToNextVersionTask, dependsOn: 'publishJavadoc')
 //        project.task('release', dependsOn: 'updateToNextVersion')
+//        }
     }
 
 }
