@@ -214,7 +214,6 @@ gradle.buildFinished { BuildResult result ->
     }
 }
 
-//apply from: 'gradle/maven-deployment.gradle'
 apply from: 'gradle/publish.gradle'
 apply from: 'gradle/morphia-release-process.gradle'
 
