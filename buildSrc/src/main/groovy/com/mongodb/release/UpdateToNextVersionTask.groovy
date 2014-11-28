@@ -21,7 +21,7 @@ class UpdateToNextVersionTask extends DefaultTask {
 
         def git = Git.open(new File('.'))
         git.commit()
-           .setOnly(buildFile.name)
+           .setAll(true)
            .setMessage("Updated to next development version: ${newVersion}")
            .call()
     }
