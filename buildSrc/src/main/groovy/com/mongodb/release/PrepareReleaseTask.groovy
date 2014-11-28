@@ -3,6 +3,7 @@ package com.mongodb.release
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.JGitInternalException
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,18 +18,19 @@ class PrepareReleaseTask extends DefaultTask {
 
     @TaskAction
     def prepareGitForRelease() {
-        def releaseVersion = project.release.releaseVersion
-        project.subprojects*.version = releaseVersion
-        
-        def snapshotVersion = project.release.snapshotVersion
-        def buildFile = project.file('build.gradle')
-        getLog().info "Updating ${buildFile.absolutePath} & Mongo.java from ${snapshotVersion} to ${releaseVersion}"
+        def releaseVersion = System.getProperty('releaseVersion')
+        if (!releaseVersion) {
+            throw new GradleException('When doing a full release, you need to specify a value for releaseVersion. For example, ' +
+                                      './gradlew release -DreleaseVersion=3.0.0')
+        }
+        def snapshotVersion = releaseVersion + '-SNAPSHOT'
+        getLog().info "Updating ${project.release.filesToUpdate} from ${snapshotVersion} to ${releaseVersion}"
 
         project.release.filesToUpdate.each {
             project.ant.replaceregexp(file: it, match: snapshotVersion, replace: releaseVersion) 
         }
 
-        getLog().info 'Checking build file into git'
+        getLog().info 'Checking files into git'
         def git = Git.open(new File('.'))
         try {
             git.commit()
@@ -58,12 +60,6 @@ class PrepareReleaseTask extends DefaultTask {
 //        git.push()
 //           .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
 //           .call()
-        
-        project.version = releaseVersion
-        project.subprojects { subproject ->
-            subproject.version = releaseVersion
-        }
-
     }
 
     private Logger getLog() { project?.logger ?: LoggerFactory.getLogger(this.class) }

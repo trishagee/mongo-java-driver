@@ -28,16 +28,4 @@ class ReleasePluginSpecification extends Specification {
 //        project.tasks.draftReleaseNotes instanceof DraftReleaseNotesTask
 //    }
 //
-    def 'should be able to define the release version'() {
-        given:
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'release'
-
-        when:
-        project.release.releaseVersion = '0.108-SNAPSHOT'
-
-        then:
-        project.release.releaseVersion == '0.108'
-    }
-
 }
