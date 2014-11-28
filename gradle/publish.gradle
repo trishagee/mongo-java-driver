@@ -29,16 +29,19 @@ configure(subprojects.findAll { it.name != 'util' }) {
 
     /* Artifacts for publishing */
     task sourceJar(type: Jar) {
+        version = releaseVersion
         classifier = 'sources'
         from sourceSets.main.allSource
     }
 
     task javadocJar(type: Jar) {
+        version = releaseVersion
         classifier = 'javadoc'
         from javadoc
     }
 
     shadowJar {
+        version = releaseVersion
         dependencies {
             // exclude all "provided" dependencies 
             exclude(project.configurations.provided.allDependencies.collect { dependency("$it.group:$it.name") })
@@ -49,7 +52,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
 
     publishing {
         publications {
-            release(MavenPublication) {
+            mavenJava(MavenPublication) {
                 version = releaseVersion
                 artifact sourceJar
                 artifact javadocJar

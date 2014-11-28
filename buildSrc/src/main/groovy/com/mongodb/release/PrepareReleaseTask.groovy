@@ -19,7 +19,6 @@ class PrepareReleaseTask extends DefaultTask {
     @TaskAction
     def prepareGitForRelease() {
         def releaseVersion = project.release.releaseVersion
-        println releaseVersion
         project.subprojects*.version = releaseVersion
         
         def snapshotVersion = project.release.snapshotVersion
