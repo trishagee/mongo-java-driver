@@ -84,9 +84,9 @@ configure(subprojects.findAll { it.name != 'util' }) {
         repositories {
             maven {
                 if (releaseVersion) {
-                    url 'https://oss.sonatype.org/content/repositories/snapshots'
+                    url "$buildDir/repo/releases"
                 } else {
-                    url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                    url "$buildDir/repo/snapshots"
                 }
 
                 credentials {

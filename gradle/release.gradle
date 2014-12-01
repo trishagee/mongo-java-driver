@@ -1,0 +1,63 @@
+apply plugin: 'gradle-git'
+
+
+task prepareRelease {
+    def releaseVersion = System.getProperty('releaseVersion')
+    if (!releaseVersion) {
+        throw new GradleException('When doing a full release, you need to specify a value for releaseVersion. For example, ' +
+                                  './gradlew release -DreleaseVersion=3.0.0')
+    }
+    def snapshotVersion = releaseVersion + '-SNAPSHOT'
+    logger.info "Updating ${project.release.filesToUpdate} from ${snapshotVersion} to ${releaseVersion}"
+
+    filesToUpdate.each {
+        project.ant.replaceregexp(file: it, match: snapshotVersion, replace: releaseVersion)
+    }
+
+    logger.info 'Checking files into git'
+    def git = Git.open(new File('.'))
+    try {
+        git.commit()
+           .setAll(true)
+           .setMessage("Release ${releaseVersion}")
+           .call()
+    } catch (Exception e) {
+        if (e.getMessage().equals('No changes')) {
+            // we probably already committed these files, we're done
+            // this is not an elegant way to make this idempotent, but it does work
+            return
+        }
+    }
+
+    logger.info "Tagging release with 'r${releaseVersion}'"
+    git.tag()
+       .setName("r${releaseVersion}")
+       .setMessage("Release ${releaseVersion}")
+       .setForceUpdate(true)
+       .call()
+
+    logger.info 'Pushing changes using the credentials stored in ~/.gradle/gradle.properties'
+    String username = project.property("github.credentials.username")
+    String password = project.property("github.credentials.password")
+
+    //TODO add this back
+//        git.push()
+//           .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password))
+//           .call()
+}
+
+prepareRelease {
+    description = 'Update release version in the relevant files, commit to github and tag the release'
+    def filesToUpdate = [
+            file(project('driver').file('src/main/com/mongodb/Mongo.java')),
+            file(project.file('build.gradle'))
+    ]    
+}
+
+task release(dependsOn: prepareRelease) {
+
+}
+
+release {
+}
+

@@ -215,5 +215,5 @@ gradle.buildFinished { BuildResult result ->
 }
 
 apply from: 'gradle/publish.gradle'
-apply from: 'gradle/morphia-release-process.gradle'
+apply from: 'gradle/release.gradle'
 
