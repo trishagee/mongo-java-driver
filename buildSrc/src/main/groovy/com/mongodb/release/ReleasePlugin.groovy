@@ -35,12 +35,6 @@ class ReleasePlugin implements Plugin<Project> {
     void apply(final Project project) {
         this.project = project
         project.extensions.create('release', ReleasePluginExtension)
-
-        if (!project.release.releaseVersion) {
-            throw new GradleException('When doing a release, you need to specify a value for releaseVersion. For example, ' +
-                                      './gradlew release -DreleaseVersion=3.0.0')
-        }
-
         project.evaluationDependsOnChildren()
 
         project.task('prepareRelease', type: PrepareReleaseTask, dependsOn: project.subprojects.clean)
